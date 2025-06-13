@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Printer, User, LogOut } from 'lucide-react';
+import { Menu, X, Printer, User, LogOut, ShoppingCart, Package, UserCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { totalItems } = useCart();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -52,12 +54,54 @@ const Header: React.FC = () => {
               </Link>
             ))}
             
-            {/* User Authentication */}
+            {/* User Authentication & Cart */}
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">
-                  Ciao, {user.user_metadata?.full_name || user.email}
-                </span>
+                {/* Cart */}
+                <Link
+                  to="/carrello"
+                  className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname === '/carrello'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Carrello</span>
+                  {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Orders */}
+                <Link
+                  to="/ordini"
+                  className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname.startsWith('/ordini')
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Ordini</span>
+                </Link>
+
+                {/* Profile */}
+                <Link
+                  to="/profilo"
+                  className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname === '/profilo'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <UserCircle className="h-4 w-4" />
+                  <span>Profilo</span>
+                </Link>
+
+                {/* Logout */}
                 <button
                   onClick={handleLogout}
                   className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors"
@@ -112,10 +156,55 @@ const Header: React.FC = () => {
             
             {/* Mobile User Authentication */}
             {user ? (
-              <div className="border-t border-gray-200 pt-3 mt-3">
+              <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
+                <Link
+                  to="/carrello"
+                  className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname === '/carrello'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Carrello</span>
+                  {totalItems > 0 && (
+                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-auto">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
+                  to="/ordini"
+                  className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname.startsWith('/ordini')
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Package className="h-4 w-4" />
+                  <span>Ordini</span>
+                </Link>
+
+                <Link
+                  to="/profilo"
+                  className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname === '/profilo'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <UserCircle className="h-4 w-4" />
+                  <span>Profilo</span>
+                </Link>
+
                 <div className="px-3 py-2 text-sm text-gray-600">
                   Ciao, {user.user_metadata?.full_name || user.email}
                 </div>
+
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors flex items-center space-x-1"

@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, Star, Package, Clock, Palette, Ruler, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Star, Package, Clock, Palette, Ruler, ShoppingCart, Plus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import productsData from '../data/products.json';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addToCart, loading: cartLoading } = useCart();
+  
   const product = productsData.products.find(p => p.id === id);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
 
   if (!product) {
     return (
@@ -30,8 +37,46 @@ const ProductDetail: React.FC = () => {
   const category = productsData.categories.find(c => c.id === product.category);
   const material = productsData.materials.find(m => m.id === product.material);
 
-  const handleBuyNow = () => {
-    navigate(`/checkout/${product.id}`);
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      await addToCart(
+        product.id, 
+        product.name, 
+        product.price, 
+        quantity, 
+        product.colors[selectedColor]
+      );
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await addToCart(
+        product.id, 
+        product.name, 
+        product.price, 
+        quantity, 
+        product.colors[selectedColor]
+      );
+      navigate('/carrello');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
   };
 
   return (
@@ -160,6 +205,26 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
+            {/* Quantity */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Quantità</h3>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                >
+                  -
+                </button>
+                <span className="font-medium text-gray-900 w-12 text-center text-lg">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
             {/* Features */}
             {product.features && product.features.length > 0 && (
               <div>
@@ -179,13 +244,34 @@ const ProductDetail: React.FC = () => {
 
             {/* CTA Buttons */}
             <div className="space-y-3">
-              <button
-                onClick={handleBuyNow}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span>Acquista Ora - €{product.price.toFixed(2)}</span>
-              </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAdding || cartLoading}
+                  className="bg-gray-100 hover:bg-gray-200 disabled:bg-gray-300 text-gray-700 py-3 px-4 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  {isAdding ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                      <span>Aggiunta...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-5 w-5" />
+                      <span>Aggiungi al Carrello</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={handleBuyNow}
+                  disabled={cartLoading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-4 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  <span>Acquista Ora</span>
+                </button>
+              </div>
               
               <div className="grid grid-cols-2 gap-3">
                 <a
