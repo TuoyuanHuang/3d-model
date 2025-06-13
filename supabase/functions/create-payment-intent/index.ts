@@ -100,6 +100,35 @@ Deno.serve(async (req) => {
     // Initialize Supabase client with service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    // Prepare base parameters for Stripe API
+    const stripeParams = new URLSearchParams({
+      amount: requestData.amount.toString(),
+      currency: requestData.currency,
+      'metadata[productName]': requestData.productName,
+      'metadata[productId]': requestData.productId,
+      'metadata[customerName]': requestData.customerInfo.name,
+      'metadata[customerEmail]': requestData.customerInfo.email,
+      receipt_email: requestData.customerInfo.email,
+    })
+
+    // Only add shipping information if all required fields are present and non-empty
+    const hasCompleteShippingAddress = 
+      requestData.customerInfo.address && 
+      requestData.customerInfo.address.trim() !== '' &&
+      requestData.customerInfo.city && 
+      requestData.customerInfo.city.trim() !== '' &&
+      requestData.customerInfo.postalCode && 
+      requestData.customerInfo.postalCode.trim() !== ''
+
+    if (hasCompleteShippingAddress) {
+      stripeParams.append('shipping[name]', requestData.customerInfo.name)
+      stripeParams.append('shipping[phone]', requestData.customerInfo.phone || '')
+      stripeParams.append('shipping[address][line1]', requestData.customerInfo.address!)
+      stripeParams.append('shipping[address][city]', requestData.customerInfo.city!)
+      stripeParams.append('shipping[address][postal_code]', requestData.customerInfo.postalCode!)
+      stripeParams.append('shipping[address][country]', 'IT')
+    }
+
     // Create payment intent with Stripe API
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
       method: 'POST',
@@ -107,23 +136,7 @@ Deno.serve(async (req) => {
         'Authorization': `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        amount: requestData.amount.toString(),
-        currency: requestData.currency,
-        'metadata[productName]': requestData.productName,
-        'metadata[productId]': requestData.productId,
-        'metadata[customerName]': requestData.customerInfo.name,
-        'metadata[customerEmail]': requestData.customerInfo.email,
-        receipt_email: requestData.customerInfo.email,
-        ...(requestData.customerInfo.address && {
-          'shipping[name]': requestData.customerInfo.name,
-          'shipping[phone]': requestData.customerInfo.phone || '',
-          'shipping[address][line1]': requestData.customerInfo.address,
-          'shipping[address][city]': requestData.customerInfo.city || '',
-          'shipping[address][postal_code]': requestData.customerInfo.postalCode || '',
-          'shipping[address][country]': 'IT',
-        }),
-      }),
+      body: stripeParams,
     })
 
     if (!stripeResponse.ok) {
@@ -140,11 +153,11 @@ Deno.serve(async (req) => {
 
     const paymentIntent = await stripeResponse.json()
 
-    // Create order in database
-    const shippingAddress = requestData.customerInfo.address ? {
-      address: requestData.customerInfo.address,
-      city: requestData.customerInfo.city || '',
-      postalCode: requestData.customerInfo.postalCode || '',
+    // Create order in database - only include shipping address if complete
+    const shippingAddress = hasCompleteShippingAddress ? {
+      address: requestData.customerInfo.address!,
+      city: requestData.customerInfo.city!,
+      postalCode: requestData.customerInfo.postalCode!,
       country: 'IT'
     } : null
 
