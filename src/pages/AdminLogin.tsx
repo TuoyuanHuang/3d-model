@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Shield, Eye, EyeOff, AlertCircle, UserPlus } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -58,6 +58,9 @@ const AdminLogin: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-red-800">Errore di Login</h4>
                   <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-xs text-red-600 mt-1">
+                    Se l'admin non esiste ancora, <Link to="/admin/setup" className="underline font-medium">crealo qui</Link>
+                  </p>
                 </div>
               </div>
             )}
@@ -125,9 +128,16 @@ const AdminLogin: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mb-3">
               Solo per amministratori autorizzati
             </p>
+            <Link
+              to="/admin/setup"
+              className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 text-sm font-medium"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Crea primo admin</span>
+            </Link>
           </div>
         </div>
 
@@ -135,14 +145,14 @@ const AdminLogin: React.FC = () => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
           <h3 className="font-medium text-yellow-800 mb-2">Demo Admin</h3>
           <p className="text-sm text-yellow-700 mb-2">
-            Per testare il sistema, usa queste credenziali:
+            Credenziali predefinite per il test:
           </p>
           <div className="text-sm font-mono text-yellow-800">
             <p>Email: admin@3dsumisura.it</p>
             <p>Password: admin123456</p>
           </div>
           <p className="text-xs text-yellow-600 mt-2">
-            (Queste credenziali funzioneranno solo dopo aver creato l'utente admin)
+            Usa il <Link to="/admin/setup" className="underline font-medium">setup admin</Link> per creare l'utente
           </p>
         </div>
       </div>
