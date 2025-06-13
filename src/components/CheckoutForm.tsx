@@ -7,19 +7,24 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 
 interface CheckoutFormProps {
   amount: number;
   productName: string;
-  onSuccess?: () => void;
+  productId: string;
+  selectedColor?: string;
+  onSuccess?: (orderId: string) => void;
   onError?: (error: string) => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
   amount, 
   productName, 
+  productId,
+  selectedColor,
   onSuccess, 
   onError 
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [orderId, setOrderId] = useState<string>('');
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     email: '',
@@ -66,6 +71,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           amount: Math.round(amount * 100), // Convert to cents
           currency: 'eur',
           productName,
+          productId,
+          selectedColor,
+          quantity: 1,
           customerInfo,
         }),
       });
@@ -75,13 +83,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         throw new Error(errorData.error || 'Errore nella creazione del pagamento');
       }
 
-      const { clientSecret } = await response.json();
+      const { clientSecret, orderId: newOrderId } = await response.json();
+      setOrderId(newOrderId);
 
       // For demo purposes, we'll simulate a successful payment
       // In a real implementation, you would use Stripe Elements for card input
       setTimeout(() => {
         setPaymentStatus('success');
-        onSuccess?.();
+        onSuccess?.(newOrderId);
       }, 2000);
 
     } catch (error) {
@@ -104,6 +113,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         <p className="text-green-700 mb-4">
           Il tuo ordine per "{productName}" è stato processato con successo.
         </p>
+        <div className="bg-white rounded-lg p-4 mb-4">
+          <p className="text-sm text-gray-600 mb-1">Numero Ordine:</p>
+          <p className="font-mono text-lg font-semibold text-gray-900">#{orderId}</p>
+        </div>
         <p className="text-sm text-green-600">
           Riceverai una conferma via email a breve.
         </p>
@@ -126,13 +139,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       {/* Order Summary */}
       <div className="bg-gray-50 rounded-lg p-4">
         <h3 className="font-semibold text-gray-900 mb-2">Riepilogo Ordine</h3>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-700">{productName}</span>
-          <span className="font-semibold text-gray-900">€{amount.toFixed(2)}</span>
-        </div>
-        <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center font-semibold">
-          <span>Totale</span>
-          <span className="text-lg">€{amount.toFixed(2)}</span>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-700">{productName}</span>
+            <span className="font-semibold text-gray-900">€{amount.toFixed(2)}</span>
+          </div>
+          {selectedColor && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Colore:</span>
+              <span className="text-gray-800">{selectedColor}</span>
+            </div>
+          )}
+          <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center font-semibold">
+            <span>Totale</span>
+            <span className="text-lg">€{amount.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 

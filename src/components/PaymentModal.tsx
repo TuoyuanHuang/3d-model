@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import CheckoutForm from './CheckoutForm';
 
@@ -10,15 +10,20 @@ interface PaymentModalProps {
     name: string;
     price: number;
   };
+  selectedColor?: string;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, product }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, product, selectedColor }) => {
+  const [orderCompleted, setOrderCompleted] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleSuccess = () => {
+  const handleSuccess = (orderId: string) => {
+    setOrderCompleted(true);
     setTimeout(() => {
       onClose();
-    }, 3000);
+      setOrderCompleted(false);
+    }, 5000);
   };
 
   const handleError = (error: string) => {
@@ -44,6 +49,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, product })
           <CheckoutForm
             amount={product.price}
             productName={product.name}
+            productId={product.id}
+            selectedColor={selectedColor}
             onSuccess={handleSuccess}
             onError={handleError}
           />

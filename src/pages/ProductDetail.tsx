@@ -243,6 +243,7 @@ const ProductDetail: React.FC = () => {
           name: product.name,
           price: product.price,
         }}
+        selectedColor={product.colors[selectedColor]}
       />
     </>
   );

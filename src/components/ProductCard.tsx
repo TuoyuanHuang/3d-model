@@ -112,6 +112,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           name: product.name,
           price: product.price,
         }}
+        selectedColor={product.colors[0]} // Default to first color
       />
     </>
   );

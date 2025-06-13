@@ -1,19 +1,19 @@
 /*
-  # Create Payment Intent Edge Function
+  # Create Payment Intent and Order Edge Function
 
   1. New Edge Function
     - `create-payment-intent`
-      - Handles Stripe payment intent creation
-      - Validates request data
+      - Creates Stripe payment intent
+      - Creates order record in database
       - Returns client secret for frontend
 
   2. Security
     - Server-side Stripe secret key usage
+    - Database integration with RLS
     - Input validation and error handling
-    - CORS headers for frontend requests
 */
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +25,9 @@ interface CreatePaymentIntentRequest {
   amount: number;
   currency: string;
   productName: string;
+  productId: string;
+  quantity?: number;
+  selectedColor?: string;
   customerInfo: {
     name: string;
     email: string;
@@ -35,7 +38,7 @@ interface CreatePaymentIntentRequest {
   };
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -57,7 +60,7 @@ serve(async (req) => {
     const requestData: CreatePaymentIntentRequest = await req.json()
 
     // Validate required fields
-    if (!requestData.amount || !requestData.currency || !requestData.productName || !requestData.customerInfo?.name || !requestData.customerInfo?.email) {
+    if (!requestData.amount || !requestData.currency || !requestData.productName || !requestData.productId || !requestData.customerInfo?.name || !requestData.customerInfo?.email) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { 
@@ -67,8 +70,11 @@ serve(async (req) => {
       )
     }
 
-    // Get Stripe secret key from environment
+    // Get environment variables
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
     if (!stripeSecretKey) {
       console.error('STRIPE_SECRET_KEY not configured')
       return new Response(
@@ -79,6 +85,20 @@ serve(async (req) => {
         }
       )
     }
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase configuration missing')
+      return new Response(
+        JSON.stringify({ error: 'Database service not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Initialize Supabase client with service role key
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Create payment intent with Stripe API
     const stripeResponse = await fetch('https://api.stripe.com/v1/payment_intents', {
@@ -91,6 +111,7 @@ serve(async (req) => {
         amount: requestData.amount.toString(),
         currency: requestData.currency,
         'metadata[productName]': requestData.productName,
+        'metadata[productId]': requestData.productId,
         'metadata[customerName]': requestData.customerInfo.name,
         'metadata[customerEmail]': requestData.customerInfo.email,
         receipt_email: requestData.customerInfo.email,
@@ -119,10 +140,63 @@ serve(async (req) => {
 
     const paymentIntent = await stripeResponse.json()
 
+    // Create order in database
+    const shippingAddress = requestData.customerInfo.address ? {
+      address: requestData.customerInfo.address,
+      city: requestData.customerInfo.city || '',
+      postalCode: requestData.customerInfo.postalCode || '',
+      country: 'IT'
+    } : null
+
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        customer_name: requestData.customerInfo.name,
+        customer_email: requestData.customerInfo.email,
+        customer_phone: requestData.customerInfo.phone || null,
+        shipping_address: shippingAddress,
+        total_amount: requestData.amount / 100, // Convert from cents to euros
+        currency: requestData.currency,
+        payment_intent_id: paymentIntent.id,
+        payment_status: 'pending',
+        order_status: 'processing'
+      })
+      .select()
+      .single()
+
+    if (orderError) {
+      console.error('Database error creating order:', orderError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to create order record' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Create order item
+    const { error: orderItemError } = await supabase
+      .from('order_items')
+      .insert({
+        order_id: order.id,
+        product_id: requestData.productId,
+        product_name: requestData.productName,
+        quantity: requestData.quantity || 1,
+        unit_price: requestData.amount / 100, // Convert from cents to euros
+        selected_color: requestData.selectedColor || null
+      })
+
+    if (orderItemError) {
+      console.error('Database error creating order item:', orderItemError)
+      // Note: In a production environment, you might want to implement compensation logic here
+    }
+
     return new Response(
       JSON.stringify({
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
+        orderId: order.id
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
