@@ -8,7 +8,7 @@ import Home from './pages/Home';
 import Catalog from './pages/Catalog';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
+import Login from './pages/Login';
 import OrderDetail from './pages/OrderDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
@@ -44,7 +44,7 @@ function App() {
                       <Route path="/catalogo" element={<Catalog />} />
                       <Route path="/prodotto/:id" element={<ProductDetail />} />
                       <Route path="/checkout/:productId" element={<Checkout />} />
-                      <Route path="/ordini" element={<Orders />} />
+                      <Route path="/login" element={<Login />} />
                       <Route path="/ordini/:orderId" element={<OrderDetail />} />
                       <Route path="/chi-siamo" element={<About />} />
                       <Route path="/contatti" element={<Contact />} />

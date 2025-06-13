@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Printer, Package } from 'lucide-react';
+import { Menu, X, Printer, User, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -17,6 +19,11 @@ const Header: React.FC = () => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -45,18 +52,33 @@ const Header: React.FC = () => {
               </Link>
             ))}
             
-            {/* Orders Link */}
-            <Link
-              to="/ordini"
-              className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
-                location.pathname.startsWith('/ordini')
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-              }`}
-            >
-              <Package className="h-4 w-4" />
-              <span>Ordini</span>
-            </Link>
+            {/* User Authentication */}
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  Ciao, {user.user_metadata?.full_name || user.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Esci</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                  location.pathname === '/login'
+                    ? 'text-blue-600 bg-blue-50'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                }`}
+              >
+                <User className="h-4 w-4" />
+                <span>Accedi</span>
+              </Link>
+            )}
           </nav>
 
           {/* Mobile menu button */}
@@ -88,19 +110,36 @@ const Header: React.FC = () => {
               </Link>
             ))}
             
-            {/* Mobile Orders Link */}
-            <Link
-              to="/ordini"
-              className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
-                location.pathname.startsWith('/ordini')
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Package className="h-4 w-4" />
-              <span>Ordini</span>
-            </Link>
+            {/* Mobile User Authentication */}
+            {user ? (
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                <div className="px-3 py-2 text-sm text-gray-600">
+                  Ciao, {user.user_metadata?.full_name || user.email}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors flex items-center space-x-1"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Esci</span>
+                </button>
+              </div>
+            ) : (
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                <Link
+                  to="/login"
+                  className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                    location.pathname === '/login'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span>Accedi</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
