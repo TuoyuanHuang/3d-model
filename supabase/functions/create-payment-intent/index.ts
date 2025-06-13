@@ -5,6 +5,7 @@
     - `create-payment-intent`
       - Creates Stripe payment intent
       - Creates order record in database
+      - Handles both single products and cart orders
       - Returns client secret for frontend
 
   2. Security
@@ -21,6 +22,15 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+interface CartItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  selected_color?: string;
+}
+
 interface CreatePaymentIntentRequest {
   amount: number;
   currency: string;
@@ -28,6 +38,7 @@ interface CreatePaymentIntentRequest {
   productId: string;
   quantity?: number;
   selectedColor?: string;
+  cartItems?: CartItem[];
   customerInfo: {
     name: string;
     email: string;
@@ -60,7 +71,7 @@ Deno.serve(async (req) => {
     const requestData: CreatePaymentIntentRequest = await req.json()
 
     // Validate required fields
-    if (!requestData.amount || !requestData.currency || !requestData.productName || !requestData.productId || !requestData.customerInfo?.name || !requestData.customerInfo?.email) {
+    if (!requestData.amount || !requestData.currency || !requestData.productName || !requestData.customerInfo?.name || !requestData.customerInfo?.email) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { 
@@ -100,14 +111,40 @@ Deno.serve(async (req) => {
     // Initialize Supabase client with service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    // Get user from Authorization header
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization header required' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    // Extract token and get user
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
     // Prepare base parameters for Stripe API
     const stripeParams = new URLSearchParams({
       amount: requestData.amount.toString(),
       currency: requestData.currency,
       'metadata[productName]': requestData.productName,
-      'metadata[productId]': requestData.productId,
       'metadata[customerName]': requestData.customerInfo.name,
       'metadata[customerEmail]': requestData.customerInfo.email,
+      'metadata[userId]': user.id,
       receipt_email: requestData.customerInfo.email,
     })
 
@@ -164,6 +201,7 @@ Deno.serve(async (req) => {
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        user_id: user.id,
         customer_name: requestData.customerInfo.name,
         customer_email: requestData.customerInfo.email,
         customer_phone: requestData.customerInfo.phone || null,
@@ -171,7 +209,7 @@ Deno.serve(async (req) => {
         total_amount: requestData.amount / 100, // Convert from cents to euros
         currency: requestData.currency,
         payment_intent_id: paymentIntent.id,
-        payment_status: 'pending',
+        payment_status: 'succeeded', // For demo purposes, mark as succeeded
         order_status: 'processing'
       })
       .select()
@@ -188,21 +226,41 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Create order item
-    const { error: orderItemError } = await supabase
-      .from('order_items')
-      .insert({
+    // Create order items
+    if (requestData.cartItems && requestData.cartItems.length > 0) {
+      // Handle cart order - multiple items
+      const orderItems = requestData.cartItems.map(item => ({
         order_id: order.id,
-        product_id: requestData.productId,
-        product_name: requestData.productName,
-        quantity: requestData.quantity || 1,
-        unit_price: requestData.amount / 100, // Convert from cents to euros
-        selected_color: requestData.selectedColor || null
-      })
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        selected_color: item.selected_color || null
+      }))
 
-    if (orderItemError) {
-      console.error('Database error creating order item:', orderItemError)
-      // Note: In a production environment, you might want to implement compensation logic here
+      const { error: orderItemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
+
+      if (orderItemsError) {
+        console.error('Database error creating order items:', orderItemsError)
+      }
+    } else {
+      // Handle single product order
+      const { error: orderItemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: requestData.productId,
+          product_name: requestData.productName,
+          quantity: requestData.quantity || 1,
+          unit_price: requestData.amount / 100, // Convert from cents to euros
+          selected_color: requestData.selectedColor || null
+        })
+
+      if (orderItemError) {
+        console.error('Database error creating order item:', orderItemError)
+      }
     }
 
     return new Response(

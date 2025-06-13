@@ -1,15 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import React, { useState } from 'react';
 import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
+interface CartItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  selected_color?: string;
+}
 
 interface CheckoutFormProps {
   amount: number;
   productName: string;
   productId: string;
+  cartItems?: CartItem[];
   selectedColor?: string;
   quantity?: number;
+  customerInfo: {
+    name: string;
+    email: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
+  };
   onSuccess?: (orderId: string) => void;
   onError?: (error: string) => void;
 }
@@ -18,8 +33,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   amount, 
   productName, 
   productId,
+  cartItems,
   selectedColor,
   quantity = 1,
+  customerInfo,
   onSuccess, 
   onError 
 }) => {
@@ -27,21 +44,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [orderId, setOrderId] = useState<string>('');
-  const [customerInfo, setCustomerInfo] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    postalCode: '',
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomerInfo({
-      ...customerInfo,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +52,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     setErrorMessage('');
 
     try {
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error('Stripe non è stato caricato correttamente');
+      // Validate required customer info
+      if (!customerInfo.name || !customerInfo.email) {
+        throw new Error('Nome e email sono obbligatori');
       }
 
-      // Create payment intent using Supabase Edge Function
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
@@ -63,21 +64,25 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         throw new Error('Configurazione Supabase mancante. Assicurati di aver configurato le variabili d\'ambiente.');
       }
 
+      // Prepare request data
+      const requestData = {
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: 'eur',
+        productName,
+        productId,
+        selectedColor,
+        quantity,
+        cartItems,
+        customerInfo,
+      };
+
       const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${supabaseAnonKey}`,
         },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: 'eur',
-          productName,
-          productId,
-          selectedColor,
-          quantity,
-          customerInfo,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
@@ -113,11 +118,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           Pagamento Completato!
         </h3>
         <p className="text-green-700 mb-4">
-          Il tuo ordine per "{productName}" è stato processato con successo.
+          Il tuo ordine "{productName}" è stato processato con successo.
         </p>
         <div className="bg-white rounded-lg p-4 mb-4">
           <p className="text-sm text-gray-600 mb-1">Numero Ordine:</p>
-          <p className="font-mono text-lg font-semibold text-gray-900">#{orderId}</p>
+          <p className="font-mono text-lg font-semibold text-gray-900">#{orderId.slice(0, 8)}</p>
         </div>
         <p className="text-sm text-green-600">
           Riceverai una conferma via email a breve.
@@ -136,109 +141,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         <p className="text-sm text-blue-700">
           I tuoi dati sono protetti con crittografia SSL a 256 bit
         </p>
-      </div>
-
-      {/* Customer Information */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-gray-900">Informazioni Cliente</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Nome Completo *
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              value={customerInfo.name}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Mario Rossi"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              value={customerInfo.email}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="mario@email.com"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Telefono
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={customerInfo.phone}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="+39 123 456 7890"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-              Indirizzo
-            </label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={customerInfo.address}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Via Roma 123"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-              Città
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={customerInfo.city}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Milano"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-              CAP
-            </label>
-            <input
-              type="text"
-              id="postalCode"
-              name="postalCode"
-              value={customerInfo.postalCode}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="20121"
-            />
-          </div>
-        </div>
       </div>
 
       {/* Payment Method */}
