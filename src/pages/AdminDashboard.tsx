@@ -10,7 +10,10 @@ import {
   Download,
   Eye,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  Edit,
+  Save,
+  X
 } from 'lucide-react';
 
 interface Order {
@@ -33,112 +36,47 @@ interface Order {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, supabase } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
   const [error, setError] = useState('');
+  const [editingOrder, setEditingOrder] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [updating, setUpdating] = useState(false);
+
+  const orderStatuses = [
+    { value: 'processing', label: 'In Elaborazione', color: 'bg-blue-100 text-blue-800' },
+    { value: 'confirmed', label: 'Confermato', color: 'bg-blue-100 text-blue-800' },
+    { value: 'printing', label: 'In Stampa', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'completed', label: 'Completato', color: 'bg-green-100 text-green-800' },
+    { value: 'shipped', label: 'Spedito', color: 'bg-purple-100 text-purple-800' },
+    { value: 'delivered', label: 'Consegnato', color: 'bg-green-100 text-green-800' },
+    { value: 'canceled', label: 'Annullato', color: 'bg-red-100 text-red-800' }
+  ];
 
   const loadOrders = async () => {
     try {
       setLoading(true);
       setError('');
       
-      // Simulate loading orders - in a real app, this would fetch from Supabase
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock orders data with more comprehensive data
-      const mockOrders: Order[] = [
-        {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          customer_name: 'Mario Rossi',
-          customer_email: 'mario@email.com',
-          customer_phone: '+39 123 456 7890',
-          total_amount: 15.99,
-          currency: 'eur',
-          payment_status: 'succeeded',
-          order_status: 'completed',
-          created_at: '2024-01-15T10:30:00Z',
-          updated_at: '2024-01-16T14:20:00Z',
-          order_items: [
-            {
-              product_name: 'Drago Fantasy Dettagliato',
-              quantity: 1,
-              unit_price: 15.99,
-              selected_color: 'Grigio'
-            }
-          ]
-        },
-        {
-          id: '550e8400-e29b-41d4-a716-446655440001',
-          customer_name: 'Laura Bianchi',
-          customer_email: 'laura@email.com',
-          customer_phone: '+39 987 654 3210',
-          total_amount: 8.50,
-          currency: 'eur',
-          payment_status: 'succeeded',
-          order_status: 'printing',
-          created_at: '2024-01-20T14:15:00Z',
-          updated_at: '2024-01-20T14:15:00Z',
-          order_items: [
-            {
-              product_name: 'Supporto Smartphone Regolabile',
-              quantity: 1,
-              unit_price: 8.50,
-              selected_color: 'Nero'
-            }
-          ]
-        },
-        {
-          id: '550e8400-e29b-41d4-a716-446655440002',
-          customer_name: 'Giuseppe Verdi',
-          customer_email: 'giuseppe@email.com',
-          total_amount: 67.00,
-          currency: 'eur',
-          payment_status: 'succeeded',
-          order_status: 'shipped',
-          created_at: '2024-01-18T09:45:00Z',
-          updated_at: '2024-01-19T16:30:00Z',
-          order_items: [
-            {
-              product_name: 'Vaso Decorativo Geometrico',
-              quantity: 2,
-              unit_price: 22.00,
-              selected_color: 'Bianco'
-            },
-            {
-              product_name: 'Set Scacchi Moderno',
-              quantity: 1,
-              unit_price: 45.00,
-              selected_color: 'Bianco/Nero'
-            }
-          ]
-        },
-        {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          customer_name: 'Anna Ferrari',
-          customer_email: 'anna@email.com',
-          customer_phone: '+39 555 123 4567',
-          total_amount: 35.00,
-          currency: 'eur',
-          payment_status: 'succeeded',
-          order_status: 'processing',
-          created_at: '2024-01-22T11:20:00Z',
-          updated_at: '2024-01-22T11:20:00Z',
-          order_items: [
-            {
-              product_name: 'Prototipo Involucro Elettronico',
-              quantity: 1,
-              unit_price: 35.00,
-              selected_color: 'Grigio'
-            }
-          ]
-        }
-      ];
-      
-      setOrders(mockOrders);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items (
+            product_name,
+            quantity,
+            unit_price,
+            selected_color
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOrders(data || []);
     } catch (err) {
       setError('Errore nel caricamento degli ordini');
       console.error('Error loading orders:', err);
@@ -147,47 +85,48 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      setUpdating(true);
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          order_status: status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      // Update local state
+      setOrders(orders.map(order => 
+        order.id === orderId 
+          ? { ...order, order_status: status, updated_at: new Date().toISOString() }
+          : order
+      ));
+
+      setEditingOrder(null);
+      setNewStatus('');
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      setError('Errore nell\'aggiornamento dello stato dell\'ordine');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   useEffect(() => {
     loadOrders();
   }, []);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'processing':
-      case 'printing':
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'canceled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const statusConfig = orderStatuses.find(s => s.value === status);
+    return statusConfig?.color || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'processing':
-        return 'In Elaborazione';
-      case 'confirmed':
-        return 'Confermato';
-      case 'printing':
-        return 'In Stampa';
-      case 'completed':
-        return 'Completato';
-      case 'shipped':
-        return 'Spedito';
-      case 'delivered':
-        return 'Consegnato';
-      case 'canceled':
-        return 'Annullato';
-      default:
-        return status;
-    }
+    const statusConfig = orderStatuses.find(s => s.value === status);
+    return statusConfig?.label || status;
   };
 
   const formatDate = (dateString: string) => {
@@ -218,6 +157,24 @@ const AdminDashboard: React.FC = () => {
 
   const handleLogout = async () => {
     await signOut();
+  };
+
+  const startEditing = (orderId: string, currentStatus: string) => {
+    setEditingOrder(orderId);
+    setNewStatus(currentStatus);
+  };
+
+  const cancelEditing = () => {
+    setEditingOrder(null);
+    setNewStatus('');
+  };
+
+  const saveStatus = (orderId: string) => {
+    if (newStatus && newStatus !== orders.find(o => o.id === orderId)?.order_status) {
+      updateOrderStatus(orderId, newStatus);
+    } else {
+      cancelEditing();
+    }
   };
 
   return (
@@ -294,7 +251,7 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-              <h2 className="text-lg font-semibold text-gray-900">Tutti gli Ordini</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Gestione Ordini</h2>
               
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 {/* Search */}
@@ -316,11 +273,11 @@ const AdminDashboard: React.FC = () => {
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">Tutti gli stati</option>
-                  <option value="processing">In Elaborazione</option>
-                  <option value="printing">In Stampa</option>
-                  <option value="completed">Completato</option>
-                  <option value="shipped">Spedito</option>
-                  <option value="delivered">Consegnato</option>
+                  {orderStatuses.map(status => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
                 </select>
 
                 {/* Refresh Button */}
@@ -336,20 +293,16 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
+          {error && (
+            <div className="px-6 py-4 bg-red-50 border-b border-red-200">
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
+
           {loading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Caricamento ordini...</p>
-            </div>
-          ) : error ? (
-            <div className="p-8 text-center">
-              <p className="text-red-600 mb-4">{error}</p>
-              <button
-                onClick={loadOrders}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
-              >
-                Riprova
-              </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -416,9 +369,48 @@ const AdminDashboard: React.FC = () => {
                         €{order.total_amount.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
-                          {getStatusText(order.order_status)}
-                        </span>
+                        {editingOrder === order.id ? (
+                          <div className="flex items-center space-x-2">
+                            <select
+                              value={newStatus}
+                              onChange={(e) => setNewStatus(e.target.value)}
+                              className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              disabled={updating}
+                            >
+                              {orderStatuses.map(status => (
+                                <option key={status.value} value={status.value}>
+                                  {status.label}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => saveStatus(order.id)}
+                              disabled={updating}
+                              className="text-green-600 hover:text-green-700 disabled:text-green-400"
+                            >
+                              <Save className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              disabled={updating}
+                              className="text-gray-600 hover:text-gray-700 disabled:text-gray-400"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
+                              {getStatusText(order.order_status)}
+                            </span>
+                            <button
+                              onClick={() => startEditing(order.id, order.order_status)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button

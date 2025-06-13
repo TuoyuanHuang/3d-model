@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle, Mail, Phone, MapPin } from 'lucide-react';
 
 interface OrderDetail {
@@ -30,6 +31,7 @@ interface OrderDetail {
 
 const OrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
+  const { supabase } = useAuth();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -37,48 +39,36 @@ const OrderDetail: React.FC = () => {
   useEffect(() => {
     const loadOrder = async () => {
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setLoading(true);
         
-        // Mock order data
-        const mockOrder: OrderDetail = {
-          id: orderId || '550e8400-e29b-41d4-a716-446655440000',
-          customer_name: 'Mario Rossi',
-          customer_email: 'mario@email.com',
-          customer_phone: '+39 123 456 7890',
-          shipping_address: {
-            address: 'Via Roma 123',
-            city: 'Milano',
-            postalCode: '20121',
-            country: 'IT'
-          },
-          total_amount: 15.99,
-          currency: 'eur',
-          payment_status: 'succeeded',
-          order_status: 'printing',
-          payment_intent_id: 'pi_1234567890',
-          created_at: '2024-01-20T14:15:00Z',
-          updated_at: '2024-01-20T16:30:00Z',
-          order_items: [
-            {
-              product_name: 'Drago Fantasy Dettagliato',
-              quantity: 1,
-              unit_price: 15.99,
-              selected_color: 'Grigio'
-            }
-          ]
-        };
-        
-        setOrder(mockOrder);
+        const { data, error } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (
+              product_name,
+              quantity,
+              unit_price,
+              selected_color
+            )
+          `)
+          .eq('id', orderId)
+          .single();
+
+        if (error) throw error;
+        setOrder(data);
       } catch (err) {
+        console.error('Error loading order:', err);
         setError('Errore nel caricamento dell\'ordine');
       } finally {
         setLoading(false);
       }
     };
 
-    loadOrder();
-  }, [orderId]);
+    if (orderId) {
+      loadOrder();
+    }
+  }, [orderId, supabase]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -343,10 +333,12 @@ const OrderDetail: React.FC = () => {
                   <span className="text-sm text-gray-600">Stato:</span>
                   <span className="text-sm font-medium text-green-600">Pagato</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">ID Transazione:</span>
-                  <span className="text-sm font-mono text-gray-900">{order.payment_intent_id}</span>
-                </div>
+                {order.payment_intent_id && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">ID Transazione:</span>
+                    <span className="text-sm font-mono text-gray-900">{order.payment_intent_id}</span>
+                  </div>
+                )}
               </div>
             </div>
 
