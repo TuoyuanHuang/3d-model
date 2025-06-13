@@ -53,9 +53,15 @@ const OrderDetail: React.FC = () => {
             )
           `)
           .eq('id', orderId)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        
+        if (!data) {
+          setError('Ordine non trovato');
+          return;
+        }
+        
         setOrder(data);
       } catch (err) {
         console.error('Error loading order:', err);
