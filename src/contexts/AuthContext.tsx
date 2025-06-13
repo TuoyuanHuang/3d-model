@@ -81,11 +81,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      setIsAdmin(false);
       await supabase.auth.signOut();
     } catch (error) {
       // Handle cases where session is already invalid on server
       console.log('Session already invalid, clearing local state');
+    } finally {
+      // Always clear local state regardless of server response
       setIsAdmin(false);
       setUser(null);
       setSession(null);
