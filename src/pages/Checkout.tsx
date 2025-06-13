@@ -6,7 +6,7 @@ import { CreditCard, Lock, Package, User, MapPin, CheckCircle } from 'lucide-rea
 import CheckoutForm from '../components/CheckoutForm';
 
 const Checkout: React.FC = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { items, totalAmount, clearCart } = useCart();
   const navigate = useNavigate();
 
@@ -222,6 +222,7 @@ const Checkout: React.FC = () => {
               productId="cart-order"
               cartItems={items}
               customerInfo={customerInfo}
+              authToken={session?.access_token}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             />

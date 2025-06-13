@@ -9,7 +9,7 @@ import productsData from '../data/products.json';
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { addToCart, loading: cartLoading } = useCart();
   
   const product = productsData.products.find(p => p.id === id);
@@ -260,6 +260,7 @@ const ProductDetail: React.FC = () => {
                 selectedColor={product.colors[selectedColor]}
                 quantity={quantity}
                 customerInfo={customerInfo}
+                authToken={session?.access_token}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
               />

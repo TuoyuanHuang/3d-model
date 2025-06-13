@@ -25,6 +25,7 @@ interface CheckoutFormProps {
     city?: string;
     postalCode?: string;
   };
+  authToken?: string;
   onSuccess?: (orderId: string) => void;
   onError?: (error: string) => void;
 }
@@ -37,6 +38,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   selectedColor,
   quantity = 1,
   customerInfo,
+  authToken,
   onSuccess, 
   onError 
 }) => {
@@ -57,10 +59,13 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         throw new Error('Nome e email sono obbligatori');
       }
 
+      if (!authToken) {
+        throw new Error('Token di autenticazione mancante. Effettua il login per continuare.');
+      }
+
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
-      if (!supabaseUrl || !supabaseAnonKey) {
+      if (!supabaseUrl) {
         throw new Error('Configurazione Supabase mancante. Assicurati di aver configurato le variabili d\'ambiente.');
       }
 
@@ -80,7 +85,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Authorization': `Bearer ${authToken}`,
         },
         body: JSON.stringify(requestData),
       });
