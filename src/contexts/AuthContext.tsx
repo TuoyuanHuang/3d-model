@@ -81,13 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     setIsAdmin(false);
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      // Gracefully handle session_not_found errors during logout
-      // The user is effectively logged out even if the session was already invalid
-      console.log('Session already expired or invalid during logout');
-    }
+    await supabase.auth.signOut();
   };
 
   useEffect(() => {

@@ -27,16 +27,13 @@ const Profile: React.FC = () => {
           .from('user_profiles')
           .select('*')
           .eq('user_id', user?.id)
-          .limit(1);
+          .single();
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
           throw error;
         }
 
-        // Use the first result if available, otherwise use default values
-        const profileData = data && data.length > 0 ? data[0] : null;
-
-        setProfile(profileData || {
+        setProfile(data || {
           full_name: user?.user_metadata?.full_name || '',
           country: 'IT'
         });
