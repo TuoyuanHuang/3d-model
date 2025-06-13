@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Star, Info, ShoppingCart, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -24,6 +24,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
   const { addToCart, loading } = useCart();
+  const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -32,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.stopPropagation();
     
     if (!user) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
 
