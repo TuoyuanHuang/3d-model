@@ -9,6 +9,7 @@ interface CheckoutFormProps {
   productName: string;
   productId: string;
   selectedColor?: string;
+  quantity?: number;
   onSuccess?: (orderId: string) => void;
   onError?: (error: string) => void;
 }
@@ -18,6 +19,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   productName, 
   productId,
   selectedColor,
+  quantity = 1,
   onSuccess, 
   onError 
 }) => {
@@ -73,7 +75,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           productName,
           productId,
           selectedColor,
-          quantity: 1,
+          quantity,
           customerInfo,
         }),
       });
@@ -134,27 +136,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         <p className="text-sm text-blue-700">
           I tuoi dati sono protetti con crittografia SSL a 256 bit
         </p>
-      </div>
-
-      {/* Order Summary */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <h3 className="font-semibold text-gray-900 mb-2">Riepilogo Ordine</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-700">{productName}</span>
-            <span className="font-semibold text-gray-900">€{amount.toFixed(2)}</span>
-          </div>
-          {selectedColor && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Colore:</span>
-              <span className="text-gray-800">{selectedColor}</span>
-            </div>
-          )}
-          <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between items-center font-semibold">
-            <span>Totale</span>
-            <span className="text-lg">€{amount.toFixed(2)}</span>
-          </div>
-        </div>
       </div>
 
       {/* Customer Information */}

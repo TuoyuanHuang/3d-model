@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Printer } from 'lucide-react';
+import { Menu, X, Printer, Package } from 'lucide-react';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,7 +30,7 @@ const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -44,6 +44,19 @@ const Header: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Orders Link */}
+            <Link
+              to="/ordini"
+              className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                location.pathname.startsWith('/ordini')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+              }`}
+            >
+              <Package className="h-4 w-4" />
+              <span>Ordini</span>
+            </Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -74,6 +87,20 @@ const Header: React.FC = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Mobile Orders Link */}
+            <Link
+              to="/ordini"
+              className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
+                location.pathname.startsWith('/ordini')
+                  ? 'text-blue-600 bg-blue-50'
+                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Package className="h-4 w-4" />
+              <span>Ordini</span>
+            </Link>
           </div>
         </div>
       )}
