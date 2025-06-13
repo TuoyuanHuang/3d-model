@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Package, 
@@ -38,6 +39,7 @@ interface Order {
 
 const AdminDashboard: React.FC = () => {
   const { signOut, user, supabase } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -157,7 +159,13 @@ const AdminDashboard: React.FC = () => {
   const completedOrders = orders.filter(order => order.order_status === 'completed').length;
 
   const handleLogout = async () => {
-    await signOut();
+    try {
+      await signOut();
+      // Navigate to admin login after successful logout
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const startEditing = (orderId: string, currentStatus: string) => {
