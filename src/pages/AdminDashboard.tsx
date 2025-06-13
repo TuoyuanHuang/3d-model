@@ -13,7 +13,8 @@ import {
   RefreshCw,
   Edit,
   Save,
-  X
+  X,
+  Home
 } from 'lucide-react';
 
 interface Order {
@@ -188,6 +189,13 @@ const AdminDashboard: React.FC = () => {
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <a
+                href="/"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <Home className="h-4 w-4" />
+                <span>Home</span>
+              </a>
               <span className="text-sm text-gray-600">
                 Benvenuto, {user?.email}
               </span>
