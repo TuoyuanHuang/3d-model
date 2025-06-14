@@ -308,52 +308,58 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
           </div>
         )}
 
-        {/* Traditional Card Payment - Updated with larger form */}
+        {/* Traditional Card Payment - FIXED STYLING */}
         <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
           <div className="flex items-center space-x-2 mb-6">
             <CreditCard className="h-6 w-6 text-gray-600" />
             <span className="font-medium text-gray-900 text-lg">Carta di Credito/Debito</span>
           </div>
-          <div className="p-6 border-2 border-gray-200 rounded-lg bg-white">
-            <div className="h-[300px]"> {/* Fixed height container */}
-              <CardElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: '18px',
-                      lineHeight: '24px',
+          
+          {/* FIXED: Proper container for CardElement */}
+          <div 
+            className="w-full p-4 border-2 border-gray-200 rounded-lg bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all"
+            style={{ 
+              minHeight: '60px',
+              display: 'block',
+              position: 'relative'
+            }}
+          >
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    lineHeight: '24px',
+                    color: '#1f2937',
+                    backgroundColor: 'transparent',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    '::placeholder': {
+                      color: '#9ca3af',
+                    },
+                    ':-webkit-autofill': {
                       color: '#1f2937',
-                      backgroundColor: '#ffffff',
-                      fontFamily: 'Inter, system-ui, sans-serif',
-                      fontSmoothing: 'antialiased',
-                      padding: '16px',
-                      '::placeholder': {
-                        color: '#9ca3af',
-                        fontSize: '18px'
-                      },
-                      ':-webkit-autofill': {
-                        color: '#1f2937',
-                      },
-                    },
-                    invalid: {
-                      color: '#ef4444',
-                      iconColor: '#ef4444',
-                    },
-                    complete: {
-                      color: '#059669',
-                      iconColor: '#059669',
                     },
                   },
-                  hidePostalCode: true,
-                  iconStyle: 'solid',
-                  classes: {
-                    base: 'min-h-[60px]',
-                    focus: 'border-blue-500 ring-2 ring-blue-200',
-                  }
-                }}
-              />
-            </div>
+                  invalid: {
+                    color: '#ef4444',
+                    iconColor: '#ef4444',
+                  },
+                  complete: {
+                    color: '#059669',
+                    iconColor: '#059669',
+                  },
+                },
+                hidePostalCode: false,
+                iconStyle: 'solid',
+              }}
+            />
           </div>
+          
+          {/* Helper text */}
+          <p className="text-sm text-gray-500 mt-2">
+            Inserisci i dati della tua carta di credito o debito
+          </p>
         </div>
       </div>
 
