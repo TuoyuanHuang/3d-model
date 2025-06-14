@@ -1,9 +1,9 @@
 /*
-  # Create Payment Intent and Order Edge Function - Enhanced
+  # Create Payment Intent and Order Edge Function - Fixed Payment Methods
 
-  1. Enhanced Payment Intent Creation
-    - Support for Google Pay and Apple Pay
-    - Automatic payment methods configuration
+  1. Fixed Payment Intent Creation
+    - Removed conflicting payment_method_types
+    - Using only automatic_payment_methods for better compatibility
     - Enhanced metadata for better tracking
 
   2. Security & Features
@@ -136,7 +136,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Prepare enhanced parameters for Stripe API with payment methods
+    // Prepare parameters for Stripe API - FIXED: Only use automatic_payment_methods
     const stripeParams = new URLSearchParams({
       amount: requestData.amount.toString(),
       currency: requestData.currency,
@@ -150,9 +150,6 @@ Deno.serve(async (req) => {
       receipt_email: requestData.customerInfo.email,
     })
 
-    // Add payment method types for better support
-    stripeParams.append('payment_method_types[]', 'card')
-    
     // Only add shipping information if all required fields are present and non-empty
     const hasCompleteShippingAddress = 
       requestData.customerInfo.address && 
