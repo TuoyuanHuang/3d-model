@@ -314,22 +314,37 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
             <CreditCard className="h-5 w-5 text-gray-600" />
             <span className="font-medium text-gray-900">Carta di Credito/Debito</span>
           </div>
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
+          <div className="p-4 border border-gray-200 rounded-lg bg-white">
+            <CardElement
+              options={{
+                style: {
+                  base: {
+                    fontSize: '16px',
+                    color: '#1f2937',
+                    backgroundColor: '#ffffff',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                    fontSmoothing: 'antialiased',
+                    '::placeholder': {
+                      color: '#9ca3af',
+                    },
+                    ':-webkit-autofill': {
+                      color: '#1f2937',
+                    },
+                  },
+                  invalid: {
+                    color: '#ef4444',
+                    iconColor: '#ef4444',
+                  },
+                  complete: {
+                    color: '#059669',
+                    iconColor: '#059669',
                   },
                 },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }}
-          />
+                hidePostalCode: true,
+                iconStyle: 'solid',
+              }}
+            />
+          </div>
         </div>
       </div>
 
