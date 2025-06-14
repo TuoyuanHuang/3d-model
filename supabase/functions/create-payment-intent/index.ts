@@ -1,17 +1,16 @@
 /*
-  # Create Payment Intent and Order Edge Function
+  # Create Payment Intent and Order Edge Function - Enhanced
 
-  1. New Edge Function
-    - `create-payment-intent`
-      - Creates Stripe payment intent
-      - Creates order record in database
-      - Handles both single products and cart orders
-      - Returns client secret for frontend
+  1. Enhanced Payment Intent Creation
+    - Support for Google Pay and Apple Pay
+    - Automatic payment methods configuration
+    - Enhanced metadata for better tracking
 
-  2. Security
+  2. Security & Features
     - Server-side Stripe secret key usage
     - Database integration with RLS
     - Input validation and error handling
+    - Support for multiple payment methods
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -137,17 +136,23 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Prepare base parameters for Stripe API
+    // Prepare enhanced parameters for Stripe API with payment methods
     const stripeParams = new URLSearchParams({
       amount: requestData.amount.toString(),
       currency: requestData.currency,
+      'automatic_payment_methods[enabled]': 'true',
+      'automatic_payment_methods[allow_redirects]': 'never',
       'metadata[productName]': requestData.productName,
       'metadata[customerName]': requestData.customerInfo.name,
       'metadata[customerEmail]': requestData.customerInfo.email,
       'metadata[userId]': user.id,
+      'metadata[orderId]': crypto.randomUUID(),
       receipt_email: requestData.customerInfo.email,
     })
 
+    // Add payment method types for better support
+    stripeParams.append('payment_method_types[]', 'card')
+    
     // Only add shipping information if all required fields are present and non-empty
     const hasCompleteShippingAddress = 
       requestData.customerInfo.address && 
@@ -172,6 +177,7 @@ Deno.serve(async (req) => {
       headers: {
         'Authorization': `Bearer ${stripeSecretKey}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Stripe-Version': '2023-10-16',
       },
       body: stripeParams,
     })

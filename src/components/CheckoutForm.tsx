@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Elements, CardElement, useStripe, useElements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
+import { CreditCard, Lock, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -52,6 +52,126 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [orderId, setOrderId] = useState<string>('');
+  const [paymentRequest, setPaymentRequest] = useState<any>(null);
+  const [canMakePayment, setCanMakePayment] = useState(false);
+
+  // Initialize Payment Request (for Google Pay / Apple Pay)
+  React.useEffect(() => {
+    if (stripe) {
+      const pr = stripe.paymentRequest({
+        country: 'IT',
+        currency: 'eur',
+        total: {
+          label: productName,
+          amount: Math.round(amount * 100), // Convert to cents
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+        requestPayerPhone: true,
+      });
+
+      // Check if Payment Request is available
+      pr.canMakePayment().then(result => {
+        if (result) {
+          setPaymentRequest(pr);
+          setCanMakePayment(true);
+        }
+      });
+
+      // Handle Payment Request events
+      pr.on('paymentmethod', async (ev) => {
+        try {
+          setIsLoading(true);
+          setPaymentStatus('processing');
+          setErrorMessage('');
+
+          // Create payment intent
+          const response = await createPaymentIntent();
+          if (!response.clientSecret) {
+            throw new Error('Failed to create payment intent');
+          }
+
+          // Confirm payment with Payment Request
+          const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+            response.clientSecret,
+            {
+              payment_method: ev.paymentMethod.id
+            },
+            { handleActions: false }
+          );
+
+          if (confirmError) {
+            ev.complete('fail');
+            throw new Error(confirmError.message || 'Payment failed');
+          }
+
+          if (paymentIntent?.status === 'succeeded') {
+            ev.complete('success');
+            setPaymentStatus('success');
+            setOrderId(response.orderId);
+            onSuccess?.(response.orderId);
+          } else {
+            ev.complete('fail');
+            throw new Error('Payment not completed');
+          }
+        } catch (error) {
+          ev.complete('fail');
+          const message = error instanceof Error ? error.message : 'Payment failed';
+          setErrorMessage(message);
+          setPaymentStatus('error');
+          onError?.(message);
+        } finally {
+          setIsLoading(false);
+        }
+      });
+    }
+  }, [stripe, amount, productName]);
+
+  const createPaymentIntent = async () => {
+    // Validate required customer info
+    if (!customerInfo.name || !customerInfo.email) {
+      throw new Error('Nome e email sono obbligatori');
+    }
+
+    if (!authToken) {
+      throw new Error('Token di autenticazione mancante. Effettua il login per continuare.');
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    
+    if (!supabaseUrl) {
+      throw new Error('Configurazione Supabase mancante. Assicurati di aver configurato le variabili d\'ambiente.');
+    }
+
+    // Prepare request data
+    const requestData = {
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: 'eur',
+      productName,
+      productId,
+      selectedColor,
+      quantity,
+      cartItems,
+      customerInfo,
+    };
+
+    // Create payment intent
+    const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Errore nella creazione del pagamento');
+    }
+
+    return await response.json();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,53 +192,11 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     setErrorMessage('');
 
     try {
-      // Validate required customer info
-      if (!customerInfo.name || !customerInfo.email) {
-        throw new Error('Nome e email sono obbligatori');
-      }
-
-      if (!authToken) {
-        throw new Error('Token di autenticazione mancante. Effettua il login per continuare.');
-      }
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      
-      if (!supabaseUrl) {
-        throw new Error('Configurazione Supabase mancante. Assicurati di aver configurato le variabili d\'ambiente.');
-      }
-
-      // Prepare request data
-      const requestData = {
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: 'eur',
-        productName,
-        productId,
-        selectedColor,
-        quantity,
-        cartItems,
-        customerInfo,
-      };
-
-      // Create payment intent
-      const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Errore nella creazione del pagamento');
-      }
-
-      const { clientSecret, orderId: newOrderId } = await response.json();
-      setOrderId(newOrderId);
+      const response = await createPaymentIntent();
+      setOrderId(response.orderId);
 
       // Confirm payment with Stripe
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(response.clientSecret, {
         payment_method: {
           card: cardElement,
           billing_details: {
@@ -141,7 +219,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
       if (paymentIntent?.status === 'succeeded') {
         setPaymentStatus('success');
-        onSuccess?.(newOrderId);
+        onSuccess?.(response.orderId);
       } else {
         throw new Error('Pagamento non completato');
       }
@@ -192,6 +270,33 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       {/* Payment Method */}
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900">Metodo di Pagamento</h3>
+        
+        {/* Google Pay / Apple Pay */}
+        {canMakePayment && paymentRequest && (
+          <div className="bg-white border border-gray-300 rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Smartphone className="h-5 w-5 text-gray-600" />
+              <span className="font-medium text-gray-900">Pagamento Rapido</span>
+            </div>
+            <PaymentRequestButtonElement 
+              options={{ 
+                paymentRequest,
+                style: {
+                  paymentRequestButton: {
+                    type: 'buy',
+                    theme: 'dark',
+                    height: '48px',
+                  },
+                },
+              }} 
+            />
+            <div className="mt-4 text-center">
+              <span className="text-sm text-gray-500">oppure</span>
+            </div>
+          </div>
+        )}
+
+        {/* Traditional Card Payment */}
         <div className="bg-white border border-gray-300 rounded-lg p-4">
           <div className="flex items-center space-x-2 mb-4">
             <CreditCard className="h-5 w-5 text-gray-600" />
