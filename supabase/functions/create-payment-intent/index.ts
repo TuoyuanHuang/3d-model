@@ -209,7 +209,7 @@ Deno.serve(async (req) => {
         total_amount: requestData.amount / 100, // Convert from cents to euros
         currency: requestData.currency,
         payment_intent_id: paymentIntent.id,
-        payment_status: 'succeeded', // For demo purposes, mark as succeeded
+        payment_status: 'pending', // Will be updated by webhook
         order_status: 'processing'
       })
       .select()

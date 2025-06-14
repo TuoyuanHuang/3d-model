@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { CreditCard, Lock, CheckCircle, AlertCircle } from 'lucide-react';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface CartItem {
   id: string;
@@ -30,7 +34,7 @@ interface CheckoutFormProps {
   onError?: (error: string) => void;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ 
+const PaymentForm: React.FC<CheckoutFormProps> = ({ 
   amount, 
   productName, 
   productId,
@@ -42,6 +46,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   onSuccess, 
   onError 
 }) => {
+  const stripe = useStripe();
+  const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -49,6 +55,18 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!stripe || !elements) {
+      setErrorMessage('Stripe non è ancora caricato. Riprova tra qualche secondo.');
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setErrorMessage('Elemento carta non trovato');
+      return;
+    }
+
     setIsLoading(true);
     setPaymentStatus('processing');
     setErrorMessage('');
@@ -81,6 +99,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         customerInfo,
       };
 
+      // Create payment intent
       const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
         method: 'POST',
         headers: {
@@ -98,12 +117,34 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       const { clientSecret, orderId: newOrderId } = await response.json();
       setOrderId(newOrderId);
 
-      // For demo purposes, we'll simulate a successful payment
-      // In a real implementation, you would use Stripe Elements for card input
-      setTimeout(() => {
+      // Confirm payment with Stripe
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: customerInfo.name,
+            email: customerInfo.email,
+            phone: customerInfo.phone,
+            address: customerInfo.address && customerInfo.city && customerInfo.postalCode ? {
+              line1: customerInfo.address,
+              city: customerInfo.city,
+              postal_code: customerInfo.postalCode,
+              country: 'IT',
+            } : undefined,
+          },
+        },
+      });
+
+      if (stripeError) {
+        throw new Error(stripeError.message || 'Errore durante il pagamento');
+      }
+
+      if (paymentIntent?.status === 'succeeded') {
         setPaymentStatus('success');
         onSuccess?.(newOrderId);
-      }, 2000);
+      } else {
+        throw new Error('Pagamento non completato');
+      }
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore durante il pagamento';
@@ -151,19 +192,27 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       {/* Payment Method */}
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900">Metodo di Pagamento</h3>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex items-center space-x-2 mb-2">
+        <div className="bg-white border border-gray-300 rounded-lg p-4">
+          <div className="flex items-center space-x-2 mb-4">
             <CreditCard className="h-5 w-5 text-gray-600" />
             <span className="font-medium text-gray-900">Carta di Credito/Debito</span>
           </div>
-          <p className="text-sm text-gray-600">
-            Accettiamo Visa, Mastercard, American Express
-          </p>
-          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-sm text-yellow-800">
-              <strong>Demo Mode:</strong> Questo è un pagamento simulato per scopi dimostrativi
-            </p>
-          </div>
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                },
+                invalid: {
+                  color: '#9e2146',
+                },
+              },
+            }}
+          />
         </div>
       </div>
 
@@ -179,7 +228,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
       <button
         type="submit"
-        disabled={isLoading || paymentStatus === 'processing'}
+        disabled={!stripe || isLoading || paymentStatus === 'processing'}
         className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-4 px-6 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
       >
         {isLoading ? (
@@ -199,6 +248,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         Cliccando "Paga" accetti i nostri termini di servizio e la privacy policy
       </p>
     </form>
+  );
+};
+
+const CheckoutForm: React.FC<CheckoutFormProps> = (props) => {
+  return (
+    <Elements stripe={stripePromise}>
+      <PaymentForm {...props} />
+    </Elements>
   );
 };
 
