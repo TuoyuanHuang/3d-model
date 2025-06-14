@@ -308,30 +308,20 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
           </div>
         )}
 
-        {/* Traditional Card Payment - FIXED STYLING */}
-        <div className="bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center space-x-2 mb-6">
-            <CreditCard className="h-6 w-6 text-gray-600" />
-            <span className="font-medium text-gray-900 text-lg">Carta di Credito/Debito</span>
+        {/* Traditional Card Payment */}
+        <div className="bg-white border border-gray-300 rounded-lg p-4">
+          <div className="flex items-center space-x-2 mb-4">
+            <CreditCard className="h-5 w-5 text-gray-600" />
+            <span className="font-medium text-gray-900">Carta di Credito/Debito</span>
           </div>
-          
-          {/* FIXED: Proper container for CardElement */}
-          <div 
-            className="w-full p-4 border-2 border-gray-200 rounded-lg bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200 transition-all"
-            style={{ 
-              minHeight: '60px',
-              display: 'block',
-              position: 'relative'
-            }}
-          >
+          <div className="p-4 border border-gray-200 rounded-lg bg-white">
             <CardElement
               options={{
                 style: {
                   base: {
                     fontSize: '16px',
-                    lineHeight: '24px',
                     color: '#1f2937',
-                    backgroundColor: 'transparent',
+                    backgroundColor: '#ffffff',
                     fontFamily: 'Inter, system-ui, sans-serif',
                     fontSmoothing: 'antialiased',
                     '::placeholder': {
@@ -350,16 +340,11 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
                     iconColor: '#059669',
                   },
                 },
-                hidePostalCode: false,
+                hidePostalCode: true,
                 iconStyle: 'solid',
               }}
             />
           </div>
-          
-          {/* Helper text */}
-          <p className="text-sm text-gray-500 mt-2">
-            Inserisci i dati della tua carta di credito o debito
-          </p>
         </div>
       </div>
 
