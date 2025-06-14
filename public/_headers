@@ -1,0 +1,14 @@
+/*
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: cross-origin
+
+# Allow Stripe resources
+https://js.stripe.com/*
+  Cross-Origin-Resource-Policy: cross-origin
+
+https://m.stripe.com/*
+  Cross-Origin-Resource-Policy: cross-origin
+
+https://q.stripe.com/*
+  Cross-Origin-Resource-Policy: cross-origin
