@@ -315,35 +315,42 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
             <span className="font-medium text-gray-900">Carta di Credito/Debito</span>
           </div>
           <div className="p-4 border border-gray-200 rounded-lg bg-white">
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: '16px',
-                    color: '#1f2937',
-                    backgroundColor: '#ffffff',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                    fontSmoothing: 'antialiased',
-                    '::placeholder': {
-                      color: '#9ca3af',
-                    },
-                    ':-webkit-autofill': {
-                      color: '#1f2937',
-                    },
-                  },
-                  invalid: {
-                    color: '#ef4444',
-                    iconColor: '#ef4444',
-                  },
-                  complete: {
-                    color: '#059669',
-                    iconColor: '#059669',
-                  },
-                },
-                hidePostalCode: true,
-                iconStyle: 'solid',
-              }}
-            />
+<CardElement
+  options={{
+    style: {
+      base: {
+        fontSize: '18px', // Increased from 16px
+        lineHeight: '24px', // Added line height
+        color: '#1f2937',
+        backgroundColor: '#ffffff',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSmoothing: 'antialiased',
+        padding: '16px', // Added padding
+        '::placeholder': {
+          color: '#9ca3af',
+          fontSize: '18px' // Increased placeholder font size
+        },
+        ':-webkit-autofill': {
+          color: '#1f2937',
+        },
+      },
+      invalid: {
+        color: '#ef4444',
+        iconColor: '#ef4444',
+      },
+      complete: {
+        color: '#059669',
+        iconColor: '#059669',
+      },
+    },
+    hidePostalCode: true,
+    iconStyle: 'solid',
+    classes: { // Added classes for base and focus states
+      base: 'min-h-[60px]', // Minimum height of 60px
+      focus: 'border-blue-500 ring-2 ring-blue-200',
+    }
+  }}
+/>
           </div>
         </div>
       </div>
