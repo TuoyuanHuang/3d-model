@@ -3,7 +3,7 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: cross-origin
 
-# Allow Stripe resources
+# Allow Stripe resources specifically
 https://js.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin
 
@@ -11,4 +11,7 @@ https://m.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin
 
 https://q.stripe.com/*
+  Cross-Origin-Resource-Policy: cross-origin
+
+https://api.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin

@@ -9,16 +9,18 @@ export default defineConfig({
   },
   server: {
     headers: {
-      // Allow cross-origin resources for Stripe
+      // Updated CORS headers to allow Stripe resources
       'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     },
   },
   preview: {
     headers: {
-      // Allow cross-origin resources for Stripe
+      // Updated CORS headers to allow Stripe resources
       'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     },
   },
 });
