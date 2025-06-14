@@ -1,9 +1,11 @@
 /*
-  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Embedder-Policy: unsafe-none
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Resource-Policy: cross-origin
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
 
-# Allow Stripe resources
+# Allow all Stripe resources
 https://js.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin
 
@@ -11,4 +13,7 @@ https://m.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin
 
 https://q.stripe.com/*
+  Cross-Origin-Resource-Policy: cross-origin
+
+https://*.stripe.com/*
   Cross-Origin-Resource-Policy: cross-origin
