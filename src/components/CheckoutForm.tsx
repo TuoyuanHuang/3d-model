@@ -155,6 +155,8 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       customerInfo,
     };
 
+    console.log('Creating payment intent with data:', requestData);
+
     // Create payment intent
     const response = await fetch(`${supabaseUrl}/functions/v1/create-payment-intent`, {
       method: 'POST',
@@ -166,11 +168,20 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorText = await response.text();
+      console.error('Payment intent creation failed:', errorText);
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: 'Errore nella creazione del pagamento' };
+      }
       throw new Error(errorData.error || 'Errore nella creazione del pagamento');
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('Payment intent created successfully:', result);
+    return result;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -226,6 +237,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Errore durante il pagamento';
+      console.error('Payment error:', error);
       setErrorMessage(message);
       setPaymentStatus('error');
       onError?.(message);

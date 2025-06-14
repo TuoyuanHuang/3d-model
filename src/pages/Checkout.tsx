@@ -19,12 +19,20 @@ const Checkout: React.FC = () => {
     postalCode: '',
   });
 
+  const [formValid, setFormValid] = useState(false);
+
   // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0) {
       navigate('/carrello');
     }
   }, [items, navigate]);
+
+  // Validate form
+  useEffect(() => {
+    const isValid = customerInfo.name.trim() !== '' && customerInfo.email.trim() !== '';
+    setFormValid(isValid);
+  }, [customerInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerInfo({
@@ -34,15 +42,39 @@ const Checkout: React.FC = () => {
   };
 
   const handlePaymentSuccess = async (orderId: string) => {
-    // Clear cart after successful payment
-    await clearCart();
-    // Navigate to order detail page
-    navigate(`/ordini/${orderId}`);
+    try {
+      // Clear cart after successful payment
+      await clearCart();
+      // Navigate to order detail page
+      navigate(`/ordini/${orderId}`);
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      // Still navigate to order page even if cart clear fails
+      navigate(`/ordini/${orderId}`);
+    }
   };
 
   const handlePaymentError = (error: string) => {
     console.error('Payment error:', error);
   };
+
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Carrello Vuoto</h1>
+          <p className="text-gray-600 mb-4">Aggiungi prodotti al carrello per procedere al checkout</p>
+          <button
+            onClick={() => navigate('/catalogo')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+          >
+            Vai al Catalogo
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -216,16 +248,27 @@ const Checkout: React.FC = () => {
             </div>
 
             {/* Payment Form */}
-            <CheckoutForm
-              amount={totalAmount}
-              productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
-              productId="cart-order"
-              cartItems={items}
-              customerInfo={customerInfo}
-              authToken={session?.access_token}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-            />
+            {formValid ? (
+              <CheckoutForm
+                amount={totalAmount}
+                productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
+                productId="cart-order"
+                cartItems={items}
+                customerInfo={customerInfo}
+                authToken={session?.access_token}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            ) : (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-yellow-800 font-medium">
+                  Completa le informazioni obbligatorie per procedere al pagamento
+                </p>
+                <p className="text-yellow-700 text-sm mt-1">
+                  I campi Nome e Email sono obbligatori
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
