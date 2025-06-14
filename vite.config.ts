@@ -9,15 +9,15 @@ export default defineConfig({
   },
   server: {
     headers: {
-      // Disabilita COEP per permettere a Stripe di funzionare
-      'Cross-Origin-Embedder-Policy': 'unsafe-none',
+      // Allow cross-origin resources for Stripe
+      'Cross-Origin-Embedder-Policy': credentialless,
       'Cross-Origin-Opener-Policy': 'same-origin',
     },
   },
   preview: {
     headers: {
-      // Disabilita COEP per permettere a Stripe di funzionare
-      'Cross-Origin-Embedder-Policy': 'unsafe-none',
+      // Allow cross-origin resources for Stripe
+      'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
     },
   },
