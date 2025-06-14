@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     headers: {
       // Allow cross-origin resources for Stripe
-      'Cross-Origin-Embedder-Policy': 'credentialless',
+      'Cross-Origin-Embedder-Policy': credentialless,
       'Cross-Origin-Opener-Policy': 'same-origin',
     },
   },
