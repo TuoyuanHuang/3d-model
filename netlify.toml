@@ -2,6 +2,9 @@
   publish = "dist"
   command = "npm run build"
 
+[build.environment]
+  NODE_VERSION = "18"
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -37,3 +40,8 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Environment variables placeholder - these need to be set in Netlify dashboard
+# VITE_SUPABASE_URL = "your_supabase_url"
+# VITE_SUPABASE_ANON_KEY = "your_supabase_anon_key"
+# VITE_STRIPE_PUBLISHABLE_KEY = "your_stripe_publishable_key"

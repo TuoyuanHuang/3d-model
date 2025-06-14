@@ -7,9 +7,22 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          stripe: ['@stripe/stripe-js', '@stripe/react-stripe-js'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    }
+  },
   server: {
     headers: {
-      // Updated CORS headers to allow Stripe resources
       'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -17,7 +30,6 @@ export default defineConfig({
   },
   preview: {
     headers: {
-      // Updated CORS headers to allow Stripe resources
       'Cross-Origin-Embedder-Policy': 'credentialless',
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Resource-Policy': 'cross-origin',
