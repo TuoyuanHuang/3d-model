@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Shield, Eye, EyeOff, AlertCircle, UserPlus } from 'lucide-react';
+import { Shield, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -42,6 +42,17 @@ const AdminLogin: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Back Button */}
+        <div className="text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-blue-100 hover:text-white transition-colors mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Torna alla Home</span>
+          </Link>
+        </div>
+
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -58,9 +69,6 @@ const AdminLogin: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-red-800">Errore di Login</h4>
                   <p className="text-sm text-red-700">{error}</p>
-                  <p className="text-xs text-red-600 mt-1">
-                    Se l'admin non esiste ancora, <Link to="/admin/setup" className="underline font-medium">crealo qui</Link>
-                  </p>
                 </div>
               </div>
             )}
@@ -128,16 +136,9 @@ const AdminLogin: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-gray-600">
               Solo per amministratori autorizzati
             </p>
-            <Link
-              to="/admin/setup"
-              className="inline-flex items-center space-x-2 text-purple-600 hover:text-purple-700 text-sm font-medium"
-            >
-              <UserPlus className="h-4 w-4" />
-              <span>Crea primo admin</span>
-            </Link>
           </div>
         </div>
 
@@ -152,7 +153,7 @@ const AdminLogin: React.FC = () => {
             <p>Password: admin123456</p>
           </div>
           <p className="text-xs text-yellow-600 mt-2">
-            Usa il <Link to="/admin/setup" className="underline font-medium">setup admin</Link> per creare l'utente
+            Contatta l'amministratore per ottenere l'accesso
           </p>
         </div>
       </div>
