@@ -101,33 +101,6 @@ const Contact: React.FC = () => {
                 <ContactForm />
               </div>
             </div>
-
-            {/* Map & Additional Info */}
-            <div className="space-y-8">
-              
-
-              {/* Additional Info */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Come Raggiungerci
-                </h3>
-                <div className="space-y-3 text-gray-600">
-                  <p className="flex items-start space-x-2">
-                    <span className="font-medium">Metro:</span>
-                    <span>Linea M1, fermata Duomo (5 min a piedi)</span>
-                  </p>
-                  <p className="flex items-start space-x-2">
-                    <span className="font-medium">Bus:</span>
-                    <span>Linee 54, 61, fermata Via Roma</span>
-                  </p>
-                  <p className="flex items-start space-x-2">
-                    <span className="font-medium">Auto:</span>
-                    <span>Parcheggio a pagamento nelle vicinanze</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
