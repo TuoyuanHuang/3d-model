@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, Info, ShoppingCart, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import LazyImage from './LazyImage';
 
 interface Product {
   id: string;
@@ -50,7 +51,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group">
       <div className="relative overflow-hidden">
         <Link to={`/prodotto/${product.id}`}>
-          <img
+          <LazyImage
             src={product.images[0]}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"

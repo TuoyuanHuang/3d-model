@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
-import ProductCard from '../components/ProductCard';
+import React, { useState, useMemo, Suspense } from 'react';
 import { Search, Filter, SortAsc } from 'lucide-react';
 import productsData from '../data/products.json';
+
+// Lazy load ProductCard component
+const ProductCard = React.lazy(() => import('../components/ProductCard'));
 
 const Catalog: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,6 +46,18 @@ const Catalog: React.FC = () => {
     setPriceRange([0, 100]);
     setSortBy('name');
   };
+
+  const ProductSkeleton = () => (
+    <div className="bg-white rounded-xl shadow-sm p-4 animate-pulse">
+      <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+      <div className="h-3 bg-gray-200 rounded mb-4"></div>
+      <div className="flex space-x-2">
+        <div className="flex-1 h-10 bg-gray-200 rounded"></div>
+        <div className="flex-1 h-10 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -176,9 +190,17 @@ const Catalog: React.FC = () => {
 
             {filteredAndSortedProducts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredAndSortedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                <Suspense fallback={
+                  <>
+                    {[...Array(6)].map((_, i) => (
+                      <ProductSkeleton key={i} />
+                    ))}
+                  </>
+                }>
+                  {filteredAndSortedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </Suspense>
               </div>
             ) : (
               <div className="text-center py-12">

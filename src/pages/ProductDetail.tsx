@@ -4,6 +4,7 @@ import { ArrowLeft, Mail, Phone, Star, Package, Clock, Palette, Ruler, ShoppingC
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import CheckoutForm from '../components/CheckoutForm';
+import LazyImage from '../components/LazyImage';
 import productsData from '../data/products.json';
 
 const ProductDetail: React.FC = () => {
@@ -118,7 +119,7 @@ const ProductDetail: React.FC = () => {
               </h2>
 
               <div className="flex space-x-4 mb-6">
-                <img
+                <LazyImage
                   src={product.images[0]}
                   alt={product.name}
                   className="w-20 h-20 object-cover rounded-lg"
@@ -289,7 +290,7 @@ const ProductDetail: React.FC = () => {
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
-              <img
+              <LazyImage
                 src={product.images[selectedImage]}
                 alt={product.name}
                 className="w-full h-full object-cover"
@@ -305,7 +306,7 @@ const ProductDetail: React.FC = () => {
                       selectedImage === index ? 'border-blue-500' : 'border-gray-200'
                     }`}
                   >
-                    <img
+                    <LazyImage
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
