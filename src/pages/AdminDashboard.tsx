@@ -17,7 +17,9 @@ import {
   X,
   Home,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MapPin,
+  Truck
 } from 'lucide-react';
 
 interface Order {
@@ -25,6 +27,12 @@ interface Order {
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
+  shipping_address?: {
+    address: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
   total_amount: number;
   currency: string;
   payment_status: string;
@@ -406,7 +414,7 @@ const AdminDashboard: React.FC = () => {
                   </div>
 
                   {/* Customer Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">Cliente</h4>
                       <p className="text-sm text-gray-600">{order.customer_name}</p>
@@ -415,6 +423,24 @@ const AdminDashboard: React.FC = () => {
                         <p className="text-sm text-gray-600">{order.customer_phone}</p>
                       )}
                     </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2 flex items-center">
+                        <Truck className="h-4 w-4 mr-1" />
+                        Indirizzo di Spedizione
+                      </h4>
+                      {order.shipping_address ? (
+                        <div className="text-sm text-gray-600">
+                          <p>{order.customer_name}</p>
+                          <p>{order.shipping_address.address}</p>
+                          <p>{order.shipping_address.postalCode} {order.shipping_address.city}</p>
+                          <p>{order.shipping_address.country}</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic">Nessun indirizzo fornito</p>
+                      )}
+                    </div>
+                    
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">Prodotti</h4>
                       <div className="text-sm text-gray-600">
