@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Printer, User, LogOut, ShoppingCart, Package, UserCircle, Shield } from 'lucide-react';
+import { Menu, X, Printer, User, LogOut, ShoppingCart, Package, UserCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut } = useAuth();
   const { totalItems } = useCart();
 
   const navigation = [
@@ -57,21 +57,6 @@ const Header: React.FC = () => {
             {/* User Authentication & Cart */}
             {user ? (
               <div className="flex items-center space-x-4">
-                {/* Admin Dashboard Button */}
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    className={`px-3 py-2 text-sm font-medium transition-colors rounded-md flex items-center space-x-1 ${
-                      location.pathname === '/admin/dashboard'
-                        ? 'text-purple-600 bg-purple-50'
-                        : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'
-                    }`}
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>Admin</span>
-                  </Link>
-                )}
-
                 {/* Cart */}
                 <Link
                   to="/carrello"
@@ -172,22 +157,6 @@ const Header: React.FC = () => {
             {/* Mobile User Authentication */}
             {user ? (
               <div className="border-t border-gray-200 pt-3 mt-3 space-y-1">
-                {/* Admin Dashboard Button - Mobile */}
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
-                      location.pathname === '/admin/dashboard'
-                        ? 'text-purple-600 bg-purple-50'
-                        : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Shield className="h-4 w-4" />
-                    <span>Admin Dashboard</span>
-                  </Link>
-                )}
-
                 <Link
                   to="/carrello"
                   className={`block px-3 py-2 text-base font-medium transition-colors rounded-md flex items-center space-x-1 ${
@@ -234,9 +203,6 @@ const Header: React.FC = () => {
 
                 <div className="px-3 py-2 text-sm text-gray-600">
                   Ciao, {user.user_metadata?.full_name || user.email}
-                  {isAdmin && (
-                    <span className="block text-xs text-purple-600 font-medium">Amministratore</span>
-                  )}
                 </div>
 
                 <button
