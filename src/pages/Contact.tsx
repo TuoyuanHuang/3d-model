@@ -101,6 +101,9 @@ const Contact: React.FC = () => {
                 <ContactForm />
               </div>
             </div>
+
+            
+          </div>
         </div>
       </section>
 
