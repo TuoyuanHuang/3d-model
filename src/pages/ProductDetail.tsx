@@ -466,21 +466,15 @@ const ProductDetail: React.FC = () => {
               </div>
               
               <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={`mailto:info@3dsumisura.it?subject=Richiesta informazioni - ${product.name}`}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-                >
+                <div className="bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>Info</span>
-                </a>
+                  <span>info@3dsumisura.it</span>
+                </div>
                 
-                <a
-                  href="tel:+391234567890"
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-                >
+                <div className="bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2">
                   <Phone className="h-4 w-4" />
-                  <span>Chiama</span>
-                </a>
+                  <span>+39 123 456 7890</span>
+                </div>
               </div>
             </div>
 

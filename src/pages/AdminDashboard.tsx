@@ -15,7 +15,9 @@ import {
   Edit,
   Save,
   X,
-  Home
+  Home,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface Order {
@@ -49,6 +51,7 @@ const AdminDashboard: React.FC = () => {
   const [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const orderStatuses = [
     { value: 'processing', label: 'In Elaborazione', color: 'bg-blue-100 text-blue-800' },
@@ -161,7 +164,6 @@ const AdminDashboard: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      // Navigate to admin login after successful logout
       navigate('/admin/login');
     } catch (error) {
       console.error('Error during logout:', error);
@@ -184,6 +186,10 @@ const AdminDashboard: React.FC = () => {
     } else {
       cancelEditing();
     }
+  };
+
+  const toggleOrderDetails = (orderId: string) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
 
   return (
@@ -321,126 +327,172 @@ const AdminDashboard: React.FC = () => {
               <p className="text-gray-600">Caricamento ordini...</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID Ordine
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cliente
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Data
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Prodotti
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Totale
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stato
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Azioni
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          #{order.id.slice(0, 8)}
+            <div className="divide-y divide-gray-200">
+              {filteredOrders.map((order) => (
+                <div key={order.id} className="p-6">
+                  {/* Order Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Ordine #{order.id.slice(0, 8)}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {formatDate(order.created_at)}
+                        </p>
+                      </div>
+                      <div className="text-lg font-bold text-blue-600">
+                        €{order.total_amount.toFixed(2)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      {/* Status */}
+                      {editingOrder === order.id ? (
+                        <div className="flex items-center space-x-2">
+                          <select
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value)}
+                            className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            disabled={updating}
+                          >
+                            {orderStatuses.map(status => (
+                              <option key={status.value} value={status.value}>
+                                {status.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => saveStatus(order.id)}
+                            disabled={updating}
+                            className="text-green-600 hover:text-green-700 disabled:text-green-400"
+                          >
+                            <Save className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            disabled={updating}
+                            className="text-gray-600 hover:text-gray-700 disabled:text-gray-400"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {order.customer_name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {order.customer_email}
-                          </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
+                            {getStatusText(order.order_status)}
+                          </span>
+                          <button
+                            onClick={() => startEditing(order.id, order.order_status)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(order.created_at)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
+                      )}
+
+                      {/* Toggle Details */}
+                      <button
+                        onClick={() => toggleOrderDetails(order.id)}
+                        className="text-gray-600 hover:text-gray-700"
+                      >
+                        {expandedOrder === order.id ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Customer Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Cliente</h4>
+                      <p className="text-sm text-gray-600">{order.customer_name}</p>
+                      <p className="text-sm text-gray-600">{order.customer_email}</p>
+                      {order.customer_phone && (
+                        <p className="text-sm text-gray-600">{order.customer_phone}</p>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">Prodotti</h4>
+                      <div className="text-sm text-gray-600">
+                        {order.order_items.slice(0, 2).map((item, index) => (
+                          <div key={index}>
+                            {item.quantity}x {item.product_name}
+                            {item.selected_color && ` (${item.selected_color})`}
+                          </div>
+                        ))}
+                        {order.order_items.length > 2 && (
+                          <div className="text-gray-500">
+                            +{order.order_items.length - 2} altri prodotti
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {expandedOrder === order.id && (
+                    <div className="border-t border-gray-200 pt-4 mt-4">
+                      <h4 className="font-medium text-gray-900 mb-3">Dettagli Completi</h4>
+                      
+                      {/* All Order Items */}
+                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                        <h5 className="font-medium text-gray-900 mb-2">Tutti i Prodotti</h5>
+                        <div className="space-y-2">
                           {order.order_items.map((item, index) => (
-                            <div key={index} className="mb-1">
-                              {item.quantity}x {item.product_name}
-                              {item.selected_color && (
-                                <span className="text-gray-500"> ({item.selected_color})</span>
-                              )}
+                            <div key={index} className="flex justify-between items-center">
+                              <div>
+                                <span className="font-medium">{item.product_name}</span>
+                                {item.selected_color && (
+                                  <span className="text-gray-600 ml-2">({item.selected_color})</span>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm text-gray-600">
+                                  {item.quantity} x €{item.unit_price.toFixed(2)}
+                                </div>
+                                <div className="font-medium">
+                                  €{(item.quantity * item.unit_price).toFixed(2)}
+                                </div>
+                              </div>
                             </div>
                           ))}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        €{order.total_amount.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {editingOrder === order.id ? (
-                          <div className="flex items-center space-x-2">
-                            <select
-                              value={newStatus}
-                              onChange={(e) => setNewStatus(e.target.value)}
-                              className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              disabled={updating}
-                            >
-                              {orderStatuses.map(status => (
-                                <option key={status.value} value={status.value}>
-                                  {status.label}
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              onClick={() => saveStatus(order.id)}
-                              disabled={updating}
-                              className="text-green-600 hover:text-green-700 disabled:text-green-400"
-                            >
-                              <Save className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={cancelEditing}
-                              disabled={updating}
-                              className="text-gray-600 hover:text-gray-700 disabled:text-gray-400"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
+                        <div className="border-t border-gray-200 mt-3 pt-3 flex justify-between items-center font-semibold">
+                          <span>Totale Ordine:</span>
+                          <span>€{order.total_amount.toFixed(2)}</span>
+                        </div>
+                      </div>
+
+                      {/* Order Timeline */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h5 className="font-medium text-gray-900 mb-2">Informazioni Ordine</h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-600">ID Ordine:</span>
+                            <span className="ml-2 font-mono">{order.id}</span>
                           </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
-                              {getStatusText(order.order_status)}
-                            </span>
-                            <button
-                              onClick={() => startEditing(order.id, order.order_status)}
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
+                          <div>
+                            <span className="text-gray-600">Stato Pagamento:</span>
+                            <span className="ml-2 capitalize">{order.payment_status}</span>
                           </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => window.open(`/ordini/${order.id}`, '_blank')}
-                          className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span>Visualizza</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <div>
+                            <span className="text-gray-600">Creato:</span>
+                            <span className="ml-2">{formatDate(order.created_at)}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Aggiornato:</span>
+                            <span className="ml-2">{formatDate(order.updated_at)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
 
               {filteredOrders.length === 0 && (
                 <div className="p-8 text-center">
