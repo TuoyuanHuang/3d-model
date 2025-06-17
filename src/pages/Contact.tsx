@@ -102,18 +102,7 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            {/* Map & Additional Info */}
-            <div className="space-y-8">
-              {/* Map Placeholder */}
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="aspect-video bg-gray-200 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <MapPin className="h-12 w-12 mx-auto mb-2" />
-                    <p>Mappa Interattiva</p>
-                    <p className="text-sm">Via Roma 123, Milano</p>
-                  </div>
-                </div>
-              </div>
+            
 
               {/* Additional Info */}
               <div className="bg-white rounded-lg shadow-sm p-6">
