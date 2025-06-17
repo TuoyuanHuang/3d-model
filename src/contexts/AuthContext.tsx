@@ -10,9 +10,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  isAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
+  checkAdminStatus: () => Promise<boolean>;
   supabase: typeof supabase;
 }
 
@@ -29,7 +31,29 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const checkAdminStatus = async (): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('id, is_active')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      const adminStatus = !error && data;
+      setIsAdmin(!!adminStatus);
+      return !!adminStatus;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+      return false;
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -40,6 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         return { error };
+      }
+
+      // Update last login for admin users
+      if (data.user) {
+        await supabase.rpc('update_admin_last_login', {
+          admin_user_id: data.user.id
+        });
       }
 
       return { error: null };
@@ -56,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Session already invalid, clearing local state');
     } finally {
       // Always clear local state regardless of server response
+      setIsAdmin(false);
       setUser(null);
       setSession(null);
     }
@@ -76,17 +108,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (session?.user) {
+        await checkAdminStatus();
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // Check admin status when user changes
+  useEffect(() => {
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
+
   const value = {
     user,
     session,
+    isAdmin,
     loading,
     signIn,
     signOut,
+    checkAdminStatus,
     supabase,
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
@@ -244,6 +244,17 @@ const Login: React.FC = () => {
               }
             </button>
           </div>
+
+          {!isSignUp && (
+            <div className="mt-4 text-center">
+              <Link
+                to="/admin/login"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Sei un amministratore? Accedi qui
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Demo info */}
