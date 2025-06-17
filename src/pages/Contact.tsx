@@ -102,7 +102,9 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            
+            {/* Map & Additional Info */}
+            <div className="space-y-8">
+              
 
               {/* Additional Info */}
               <div className="bg-white rounded-lg shadow-sm p-6">
