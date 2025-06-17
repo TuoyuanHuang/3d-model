@@ -137,25 +137,13 @@ const AdminLogin: React.FC = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Solo per amministratori autorizzati
+              
             </p>
           </div>
         </div>
 
         {/* Demo credentials info */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-          <h3 className="font-medium text-yellow-800 mb-2">Demo Admin</h3>
-          <p className="text-sm text-yellow-700 mb-2">
-            Credenziali predefinite per il test:
-          </p>
-          <div className="text-sm font-mono text-yellow-800">
-            <p>Email: admin@3dsumisura.it</p>
-            <p>Password: admin123456</p>
-          </div>
-          <p className="text-xs text-yellow-600 mt-2">
-            Contatta l'amministratore per ottenere l'accesso
-          </p>
-        </div>
+        
       </div>
     </div>
   );
