@@ -97,10 +97,7 @@ const Checkout: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
-          <p className="text-gray-600">Completa il tuo ordine con pagamento sicuro</p>
-        </div>
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -206,15 +203,6 @@ const Checkout: React.FC = () => {
             </div>
 
             {/* Security Notice */}
-            <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <Lock className="h-5 w-5 text-green-600" />
-                <span className="font-medium text-green-800">Pagamento Sicuro</span>
-              </div>
-              <p className="text-sm text-green-700">
-                I tuoi dati sono protetti con crittografia SSL a 256 bit
-              </p>
-            </div>
           </div>
 
           {/* Payment Form */}
