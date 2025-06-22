@@ -245,16 +245,7 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          {!isSignUp && (
-            <div className="mt-4 text-center">
-              <Link
-                to="/admin/login"
-                className="text-sm text-gray-600 hover:text-gray-900"
-              >
-                Sei un amministratore? Accedi qui
-              </Link>
-            </div>
-          )}
+          
         </div>
 
         {/* Demo info */}
