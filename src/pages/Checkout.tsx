@@ -2,13 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { CreditCard, Lock, Package, User, MapPin, CheckCircle } from 'lucide-react';
+import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck } from 'lucide-react';
 import CheckoutForm from '../components/CheckoutForm';
+
+// Delivery options constants
+const EXPRESS_DELIVERY_FREE_THRESHOLD = 100;
+const EXPRESS_DELIVERY_COST = 6.50;
+const STANDARD_DELIVERY_COST = 3.00;
 
 const Checkout: React.FC = () => {
   const { user, session } = useAuth();
   const { items, totalAmount, clearCart } = useCart();
   const navigate = useNavigate();
+
+  // Delivery method state
+  const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
 
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -20,6 +28,15 @@ const Checkout: React.FC = () => {
   });
 
   const [formValid, setFormValid] = useState(false);
+
+  // Calculate delivery fee based on method and cart total
+  const deliveryFee = 
+    deliveryMethod === 'express' 
+      ? (totalAmount >= EXPRESS_DELIVERY_FREE_THRESHOLD ? 0 : EXPRESS_DELIVERY_COST)
+      : STANDARD_DELIVERY_COST;
+
+  // Calculate final total including delivery
+  const finalTotal = totalAmount + deliveryFee;
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -116,9 +133,75 @@ const Checkout: React.FC = () => {
             </div>
 
             <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between items-center text-lg font-semibold">
-                <span>Totale:</span>
-                <span className="text-blue-600">€{totalAmount.toFixed(2)}</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotale</span>
+                  <span className="font-medium text-gray-900">€{totalAmount.toFixed(2)}</span>
+                </div>
+                
+                {/* Delivery Method Selection */}
+                <div className="border-t border-gray-200 pt-3 pb-2">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <Truck className="h-4 w-4 mr-2" />
+                    Metodo di Spedizione
+                  </h4>
+                  
+                  <div className="space-y-2">
+                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="deliveryMethod"
+                        value="standard"
+                        checked={deliveryMethod === 'standard'}
+                        onChange={() => setDeliveryMethod('standard')}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <div className="ml-3 flex-1">
+                        <p className="text-sm font-medium text-gray-900">Spedizione Standard (5-7 giorni)</p>
+                        <p className="text-xs text-gray-500">€{STANDARD_DELIVERY_COST.toFixed(2)}</p>
+                      </div>
+                    </label>
+                    
+                    <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                      <input
+                        type="radio"
+                        name="deliveryMethod"
+                        value="express"
+                        checked={deliveryMethod === 'express'}
+                        onChange={() => setDeliveryMethod('express')}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <div className="ml-3 flex-1">
+                        <p className="text-sm font-medium text-gray-900">Spedizione Express (3-5 giorni)</p>
+                        <p className="text-xs text-gray-500">
+                          {totalAmount >= EXPRESS_DELIVERY_FREE_THRESHOLD 
+                            ? 'Gratuita' 
+                            : `€${EXPRESS_DELIVERY_COST.toFixed(2)}`}
+                          {totalAmount < EXPRESS_DELIVERY_FREE_THRESHOLD && 
+                            ` (gratuita per ordini sopra €${EXPRESS_DELIVERY_FREE_THRESHOLD})`}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {deliveryMethod === 'express' ? 'Express Delivery (3-5 giorni)' : 'Standard Delivery (5-7 giorni)'}
+                  </span>
+                  <span className="font-medium text-gray-900">
+                    {deliveryFee === 0 
+                      ? 'Gratuita' 
+                      : `€${deliveryFee.toFixed(2)}`}
+                  </span>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="flex justify-between">
+                    <span className="text-lg font-semibold text-gray-900">Totale</span>
+                    <span className="text-lg font-semibold text-blue-600">€{finalTotal.toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -250,11 +333,13 @@ const Checkout: React.FC = () => {
             {/* Payment Form */}
             {formValid ? (
               <CheckoutForm
-                amount={totalAmount}
+                amount={finalTotal}
                 productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
                 productId="cart-order"
                 cartItems={items}
                 customerInfo={customerInfo}
+                deliveryMethod={deliveryMethod}
+                deliveryFee={deliveryFee}
                 authToken={session?.access_token}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}

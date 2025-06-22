@@ -37,6 +37,8 @@ interface CreatePaymentIntentRequest {
   productId: string;
   quantity?: number;
   selectedColor?: string;
+  deliveryMethod?: 'standard' | 'express';
+  deliveryFee?: number;
   cartItems?: CartItem[];
   customerInfo: {
     name: string;
@@ -145,6 +147,7 @@ Deno.serve(async (req) => {
       'metadata[productName]': requestData.productName,
       'metadata[customerName]': requestData.customerInfo.name,
       'metadata[customerEmail]': requestData.customerInfo.email,
+      'metadata[deliveryMethod]': requestData.deliveryMethod || 'standard',
       'metadata[userId]': user.id,
       'metadata[orderId]': crypto.randomUUID(),
       receipt_email: requestData.customerInfo.email,
@@ -211,6 +214,8 @@ Deno.serve(async (req) => {
         shipping_address: shippingAddress,
         total_amount: requestData.amount / 100, // Convert from cents to euros
         currency: requestData.currency,
+        delivery_method: requestData.deliveryMethod || 'standard',
+        delivery_fee: requestData.deliveryFee || 0,
         payment_intent_id: paymentIntent.id,
         payment_status: 'pending', // Will be updated by webhook
         order_status: 'processing'

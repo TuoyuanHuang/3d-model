@@ -21,6 +21,8 @@ interface CheckoutFormProps {
   cartItems?: CartItem[];
   selectedColor?: string;
   quantity?: number;
+  deliveryMethod?: 'standard' | 'express';
+  deliveryFee?: number;
   customerInfo: {
     name: string;
     email: string;
@@ -41,6 +43,8 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   cartItems,
   selectedColor,
   quantity = 1,
+  deliveryMethod = 'standard',
+  deliveryFee = 0,
   customerInfo,
   authToken,
   onSuccess, 
@@ -151,6 +155,8 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       productId,
       selectedColor,
       quantity,
+      deliveryMethod,
+      deliveryFee,
       cartItems,
       customerInfo,
     };
