@@ -18,7 +18,7 @@ const Catalog: React.FC = () => {
                            product.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
       const matchesMaterial = selectedMaterial === 'all' || product.material === selectedMaterial;
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
+      const matchesPrice = product.basePrice >= priceRange[0] && product.basePrice <= priceRange[1];
 
       return matchesSearch && matchesCategory && matchesMaterial && matchesPrice;
     });
@@ -27,9 +27,9 @@ const Catalog: React.FC = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'price-low':
-          return a.price - b.price;
+          return a.basePrice - b.basePrice;
         case 'price-high':
-          return b.price - a.price;
+          return b.basePrice - a.basePrice;
         case 'name':
         default:
           return a.name.localeCompare(b.name);
