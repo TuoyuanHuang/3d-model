@@ -7,7 +7,7 @@ import CheckoutForm from '../components/CheckoutForm';
 
 // Delivery options constants
 const EXPRESS_DELIVERY_FREE_THRESHOLD = 100;
-const EXPRESS_DELIVERY_COST = 10.90;
+const EXPRESS_DELIVERY_COST = 9.90;
 const STANDARD_DELIVERY_COST = 4.90;
 
 const Checkout: React.FC = () => {
