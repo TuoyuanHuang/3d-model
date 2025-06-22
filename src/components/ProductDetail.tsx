@@ -122,10 +122,7 @@ const ProductDetail: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <Clock className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-600">Tempo di stampa</p>
-                    <p className="font-medium">{product.printTime}</p>
-                  </div>
+                  
                 </div>
                 <div className="flex items-center space-x-3">
                   <Palette className="h-5 w-5 text-gray-400" />
