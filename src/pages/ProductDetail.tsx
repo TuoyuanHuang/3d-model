@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, Star, Package, Clock, Palette, Ruler, ShoppingCart, Plus } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Star, Package, Palette, Ruler, ShoppingCart, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import CheckoutForm from '../components/CheckoutForm';
 import LazyImage from '../components/LazyImage';
 import productsData from '../data/products.json';
+
+interface ProductColor {
+  name: string;
+  images: string[];
+}
+
+interface ProductSize {
+  name: string;
+  dimensions: string;
+  priceModifier: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  basePrice: number;
+  material: string;
+  colors: ProductColor[];
+  sizes: ProductSize[];
+  description: string;
+  features?: string[];
+  featured?: boolean;
+}
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,9 +37,10 @@ const ProductDetail: React.FC = () => {
   const { user, session } = useAuth();
   const { addToCart, loading: cartLoading } = useCart();
   
-  const product = productsData.products.find(p => p.id === id);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(0);
+  const product = productsData.products.find(p => p.id === id) as Product | undefined;
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -27,6 +52,11 @@ const ProductDetail: React.FC = () => {
     city: '',
     postalCode: '',
   });
+
+  // Reset selected image when color changes
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [selectedColorIndex]);
 
   if (!product) {
     return (
@@ -47,6 +77,13 @@ const ProductDetail: React.FC = () => {
 
   const category = productsData.categories.find(c => c.id === product.category);
   const material = productsData.materials.find(m => m.id === product.material);
+  
+  // Calculate current price based on base price and size modifier
+  const currentPrice = product.basePrice + product.sizes[selectedSizeIndex].priceModifier;
+  
+  // Get current color and its images
+  const selectedColor = product.colors[selectedColorIndex];
+  const selectedSize = product.sizes[selectedSizeIndex];
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -59,9 +96,11 @@ const ProductDetail: React.FC = () => {
       await addToCart(
         product.id, 
         product.name, 
-        product.price, 
+        currentPrice, 
         quantity, 
-        product.colors[selectedColor]
+        selectedColor.name,
+        selectedSize.name,
+        selectedSize.dimensions
       );
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -120,21 +159,25 @@ const ProductDetail: React.FC = () => {
 
               <div className="flex space-x-4 mb-6">
                 <LazyImage
-                  src={product.images[0]}
+                  src={selectedColor.images[0]}
                   alt={product.name}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">{product.name}</h3>
                   <p className="text-gray-600 text-sm">{product.description}</p>
-                  <p className="text-lg font-bold text-blue-600 mt-2">€{product.price.toFixed(2)}</p>
+                  <p className="text-lg font-bold text-blue-600 mt-2">€{currentPrice.toFixed(2)}</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <span className="text-sm text-gray-600">Colore: </span>
-                  <span className="font-medium">{product.colors[selectedColor]}</span>
+                  <span className="font-medium">{selectedColor.name}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Dimensione: </span>
+                  <span className="font-medium">{selectedSize.name} ({selectedSize.dimensions})</span>
                 </div>
                 <div>
                   <span className="text-sm text-gray-600">Quantità: </span>
@@ -143,7 +186,7 @@ const ProductDetail: React.FC = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Totale:</span>
-                    <span className="text-blue-600">€{(product.price * quantity).toFixed(2)}</span>
+                    <span className="text-blue-600">€{(currentPrice * quantity).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -255,10 +298,12 @@ const ProductDetail: React.FC = () => {
               </div>
 
               <CheckoutForm
-                amount={product.price * quantity}
+                amount={currentPrice * quantity}
                 productName={product.name}
                 productId={product.id}
-                selectedColor={product.colors[selectedColor]}
+                selectedColor={selectedColor.name}
+                selectedSize={selectedSize.name}
+                sizeDimensions={selectedSize.dimensions}
                 quantity={quantity}
                 customerInfo={customerInfo}
                 authToken={session?.access_token}
@@ -291,19 +336,19 @@ const ProductDetail: React.FC = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
               <LazyImage
-                src={product.images[selectedImage]}
+                src={selectedColor.images[selectedImageIndex]}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            {product.images.length > 1 && (
+            {selectedColor.images.length > 1 && (
               <div className="flex space-x-2">
-                {product.images.map((image, index) => (
+                {selectedColor.images.map((image, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => setSelectedImageIndex(index)}
                     className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                      selectedImageIndex === index ? 'border-blue-500' : 'border-gray-200'
                     }`}
                   >
                     <LazyImage
@@ -333,7 +378,7 @@ const ProductDetail: React.FC = () => {
                 {category?.name}
               </p>
               <div className="text-3xl font-bold text-blue-600">
-                €{product.price.toFixed(2)}
+                €{currentPrice.toFixed(2)}
               </div>
             </div>
 
@@ -356,12 +401,8 @@ const ProductDetail: React.FC = () => {
                   <Ruler className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-600">Dimensioni</p>
-                    <p className="font-medium">{product.dimensions}</p>
+                    <p className="font-medium">{selectedSize.dimensions}</p>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Clock className="h-5 w-5 text-gray-400" />
-                  
                 </div>
                 <div className="flex items-center space-x-3">
                   <Palette className="h-5 w-5 text-gray-400" />
@@ -370,6 +411,32 @@ const ProductDetail: React.FC = () => {
                     <p className="font-medium">{product.colors.length}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Dimensioni
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedSizeIndex(index)}
+                    className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
+                      selectedSizeIndex === index
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                    }`}
+                  >
+                    <span className="block">{size.name}</span>
+                    <span className="text-xs text-gray-500">{size.dimensions}</span>
+                    {size.priceModifier > 0 && (
+                      <span className="text-xs text-gray-500">+€{size.priceModifier.toFixed(2)}</span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -382,14 +449,14 @@ const ProductDetail: React.FC = () => {
                 {product.colors.map((color, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedColor(index)}
+                    onClick={() => setSelectedColorIndex(index)}
                     className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-colors ${
-                      selectedColor === index
+                      selectedColorIndex === index
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
                     }`}
                   >
-                    {color}
+                    {color.name}
                   </button>
                 ))}
               </div>

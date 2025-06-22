@@ -93,11 +93,14 @@ const Cart: React.FC = () => {
                           <h3 className="text-lg font-medium text-gray-900 mb-1">
                             {item.product_name}
                           </h3>
-                          {item.selected_color && (
-                            <p className="text-sm text-gray-600 mb-2">
-                              Colore: {item.selected_color}
-                            </p>
-                          )}
+                          <div className="text-sm text-gray-600 mb-2">
+                            {item.selected_color && (
+                              <span className="mr-3">Colore: {item.selected_color}</span>
+                            )}
+                            {item.selected_size && (
+                              <span>Dimensione: {item.selected_size} {item.size_dimensions && `(${item.size_dimensions})`}</span>
+                            )}
+                          </div>
                           <p className="text-lg font-semibold text-blue-600">
                             €{item.unit_price.toFixed(2)}
                           </p>
@@ -161,7 +164,7 @@ const Cart: React.FC = () => {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Spedizione</span>
-                    <span className="font-medium text-gray-900">Gratuita</span>
+                    <span className="font-medium text-gray-900">Calcolata al checkout</span>
                   </div>
                   <div className="border-t border-gray-200 pt-3">
                     <div className="flex justify-between">

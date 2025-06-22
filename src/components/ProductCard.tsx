@@ -5,16 +5,27 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import LazyImage from './LazyImage';
 
+interface ProductColor {
+  name: string;
+  images: string[];
+}
+
+interface ProductSize {
+  name: string;
+  dimensions: string;
+  priceModifier: number;
+}
+
 interface Product {
   id: string;
   name: string;
   category: string;
-  price: number;
+  basePrice: number;
   material: string;
-  colors: string[];
-  dimensions: string;
+  colors: ProductColor[];
+  sizes: ProductSize[];
   description: string;
-  images: string[];
+  features?: string[];
   featured?: boolean;
 }
 
@@ -25,8 +36,15 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
   const { addToCart, loading } = useCart();
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
+
+  // Default to first size
+  const defaultSize = product.sizes[0];
+  // Calculate current price based on base price and default size modifier
+  const currentPrice = product.basePrice + defaultSize.priceModifier;
+  // Get current color
+  const selectedColor = product.colors[selectedColorIndex];
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +57,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     try {
       setIsAdding(true);
-      await addToCart(product.id, product.name, product.price, 1, selectedColor);
+      await addToCart(
+        product.id, 
+        product.name, 
+        currentPrice, 
+        1, 
+        selectedColor.name,
+        defaultSize.name,
+        defaultSize.dimensions
+      );
     } catch (error) {
       console.error('Error adding to cart:', error);
     } finally {
@@ -52,7 +78,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative overflow-hidden">
         <Link to={`/prodotto/${product.id}`}>
           <LazyImage
-            src={product.images[0]}
+            src={selectedColor.images[0]}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -64,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         )}
         <div className="absolute top-3 right-3 bg-white bg-opacity-90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-medium text-gray-700">
-          €{product.price.toFixed(2)}
+          €{currentPrice.toFixed(2)}
         </div>
       </div>
 
@@ -84,7 +110,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.material.toUpperCase()}
           </span>
           <span className="text-xs text-gray-500">
-            {product.dimensions}
+            {product.sizes[0].dimensions}
           </span>
         </div>
 
@@ -92,7 +118,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="mb-4">
           <div className="flex items-center space-x-2 mb-2">
             <span className="text-xs text-gray-500">Colore:</span>
-            <span className="text-xs font-medium text-gray-700">{selectedColor}</span>
+            <span className="text-xs font-medium text-gray-700">{selectedColor.name}</span>
           </div>
           <div className="flex space-x-1">
             {product.colors.slice(0, 4).map((color, index) => (
@@ -100,14 +126,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 key={index}
                 onClick={(e) => {
                   e.preventDefault();
-                  setSelectedColor(color);
+                  setSelectedColorIndex(index);
                 }}
                 className={`w-6 h-6 rounded-full border-2 transition-all ${
-                  selectedColor === color 
+                  selectedColorIndex === index 
                     ? 'border-blue-500 scale-110' 
                     : 'border-gray-300 hover:border-gray-400'
                 } bg-gradient-to-br from-gray-200 to-gray-400`}
-                title={color}
+                title={color.name}
               />
             ))}
             {product.colors.length > 4 && (

@@ -48,10 +48,48 @@
       "id": "dragon-miniature",
       "name": "Drago Fantasy Dettagliato",
       "category": "miniatures",
-      "price": 15.99,
+      "basePrice": 15.99,
       "material": "resin",
-      "colors": ["Grigio", "Nero", "Rosso"],
-      "dimensions": "5x8x4 cm",
+      "colors": [
+        {
+          "name": "Grigio",
+          "images": [
+            "https://lh7-rt.googleusercontent.com/docsz/AD_4nXfa86v13uiVX11eP9ZXepWNiUIJsSRrXyWsJJ7LsmMnD8apOXAVTOFTxAhMDcTXcrHpoVQvsmMJkdfDdwyNTD_mXZuKO0YnlSpdddtM3EBe4QPJz3J_avNLoyOszmX75vCUpgwgDA?key=-ulKoyeUucZl0-5JnU3wPOeE",
+            "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd2shk1ar0HxIkCd8aktZX2OeWFJ_7KFJGiz9lXTvE0xfb9-Ui1QbXIeUGtLCcHe8CvGOg-EQzL0pNwCGjmwkMnN36frSM1kAUW3xozyY8R-R6-lr26sMOq9w5Yt3HHk-wQHmNcjw?key=-ulKoyeUucZl0-5JnU3wPOeE"
+          ]
+        },
+        {
+          "name": "Nero",
+          "images": [
+            "https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg",
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
+          ]
+        },
+        {
+          "name": "Rosso",
+          "images": [
+            "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg",
+            "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "5x8x4 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "10x16x8 cm",
+          "priceModifier": 8.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "15x24x12 cm",
+          "priceModifier": 16.00
+        }
+      ],
       "description": "Miniatura di drago altamente dettagliata, perfetta per giochi da tavolo e collezioni fantasy. Stampata in resina di alta qualità con dettagli ultra-precisi.",
       "features": [
         "Dettagli ultra-precisi",
@@ -59,21 +97,61 @@
         "Pronto per la pittura",
         "Resistente agli urti"
       ],
-      "images": [
-        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXfa86v13uiVX11eP9ZXepWNiUIJsSRrXyWsJJ7LsmMnD8apOXAVTOFTxAhMDcTXcrHpoVQvsmMJkdfDdwyNTD_mXZuKO0YnlSpdddtM3EBe4QPJz3J_avNLoyOszmX75vCUpgwgDA?key=-ulKoyeUucZl0-5JnU3wPOeE",
-        "https://lh7-rt.googleusercontent.com/docsz/AD_4nXd2shk1ar0HxIkCd8aktZX2OeWFJ_7KFJGiz9lXTvE0xfb9-Ui1QbXIeUGtLCcHe8CvGOg-EQzL0pNwCGjmwkMnN36frSM1kAUW3xozyY8R-R6-lr26sMOq9w5Yt3HHk-wQHmNcjw?key=-ulKoyeUucZl0-5JnU3wPOeE"
-      ],
       "featured": true
     },
     {
       "id": "phone-stand",
       "name": "Supporto Smartphone Regolabile",
       "category": "gadgets",
-      "price": 8.50,
+      "basePrice": 8.50,
       "material": "pla",
-      "colors": ["Bianco", "Nero", "Blu", "Rosso"],
-      "dimensions": "12x8x15 cm",
-      "printTime": "2 ore",
+      "colors": [
+        {
+          "name": "Bianco",
+          "images": [
+            "https://www.techly.it/media/catalog/product/cache/3/image/1000x/9df78eab33525d08d6e5fb8d27136e95/9/a/9aad76b00ebe6499c35117f26e295e68d3fb44a0_supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania_techly_i_smart_stand6_539.jpg",
+            "https://cdn.discordapp.com/attachments/1286814116232560700/1380898070895530085/40-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_1_10.png?ex=68458d0b&is=68443b8b&hm=11de2c0f9651f15e524d6c5e0f96bcb4c9b5b6e815e9a6b3a6845ce19bb84b02&"
+          ]
+        },
+        {
+          "name": "Nero",
+          "images": [
+            "https://cdn.discordapp.com/attachments/1286814116232560700/1380898114847768766/50-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_1_5.png?ex=68458d16&is=68443b96&hm=3d27db818fa86f00033dcd45a1ac0a85fab8e495d37e3484a146803a5c5a107b&",
+            "https://media.discordapp.net/attachments/1286814116232560700/1380898179154710548/120-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_10_1.png?ex=68458d25&is=68443ba5&hm=b9c4ed82b221ca5e9feec7b31ce174bab70d6794ba6d60f71565cf7e647032ea&=&format=webp&quality=lossless&width=894&height=894"
+          ]
+        },
+        {
+          "name": "Blu",
+          "images": [
+            "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg",
+            "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg"
+          ]
+        },
+        {
+          "name": "Rosso",
+          "images": [
+            "https://images.pexels.com/photos/4219654/pexels-photo-4219654.jpeg",
+            "https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "8x5x10 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "12x8x15 cm",
+          "priceModifier": 3.50
+        },
+        {
+          "name": "Large",
+          "dimensions": "16x10x20 cm",
+          "priceModifier": 7.00
+        }
+      ],
       "description": "Supporto ergonomico per smartphone con angolazione regolabile. Design moderno e funzionale per scrivania o comodino.",
       "features": [
         "Angolazione regolabile",
@@ -81,24 +159,61 @@
         "Compatibile con tutti gli smartphone",
         "Design minimale"
       ],
-      "images": [
-        "https://www.techly.it/media/catalog/product/cache/3/image/1000x/9df78eab33525d08d6e5fb8d27136e95/9/a/9aad76b00ebe6499c35117f26e295e68d3fb44a0_supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania_techly_i_smart_stand6_539.jpg",
-        "https://cdn.discordapp.com/attachments/1286814116232560700/1380898070895530085/40-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_1_10.png?ex=68458d0b&is=68443b8b&hm=11de2c0f9651f15e524d6c5e0f96bcb4c9b5b6e815e9a6b3a6845ce19bb84b02&",
-        "https://cdn.discordapp.com/attachments/1286814116232560700/1380898070895530085/40-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_1_10.png?ex=68458d0b&is=68443b8b&hm=11de2c0f9651f15e524d6c5e0f96bcb4c9b5b6e815e9a6b3a6845ce19bb84b02&",
-        "https://cdn.discordapp.com/attachments/1286814116232560700/1380898114847768766/50-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_1_5.png?ex=68458d16&is=68443b96&hm=3d27db818fa86f00033dcd45a1ac0a85fab8e495d37e3484a146803a5c5a107b&", "https://media.discordapp.net/attachments/1286814116232560700/1380898179154710548/120-supporto_regolabile_e_pieghevole_porta_smartphone_tablet_da_scrivania-techly-i-smart-stand6-53934_10_1.png?ex=68458d25&is=68443ba5&hm=b9c4ed82b221ca5e9feec7b31ce174bab70d6794ba6d60f71565cf7e647032ea&=&format=webp&quality=lossless&width=894&height=894"
-        
-      ],
       "featured": true
     },
     {
       "id": "decorative-vase",
       "name": "Vaso Decorativo Geometrico",
       "category": "home",
-      "price": 22.00,
+      "basePrice": 22.00,
       "material": "petg",
-      "colors": ["Bianco", "Grigio", "Verde", "Blu"],
-      "dimensions": "15x15x20 cm",
-      "printTime": "6 ore",
+      "colors": [
+        {
+          "name": "Bianco",
+          "images": [
+            "https://iconichome.com/wp-content/uploads/iconic-home-vase-straight-3-set-shadow-grey-581x775.jpg",
+            "https://iconichome.com/wp-content/uploads/iconic-home-vase-shape-3-set-dreamy-grey-1.jpg"
+          ]
+        },
+        {
+          "name": "Grigio",
+          "images": [
+            "https://iconichome.com/wp-content/uploads/iconic-home-vase-shape-3-set-dreamy-grey-1.jpg",
+            "https://iconichome.com/wp-content/uploads/iconic-home-vase-straight-3-set-shadow-grey-581x775.jpg"
+          ]
+        },
+        {
+          "name": "Verde",
+          "images": [
+            "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg",
+            "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg"
+          ]
+        },
+        {
+          "name": "Blu",
+          "images": [
+            "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg",
+            "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "10x10x15 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "15x15x20 cm",
+          "priceModifier": 8.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "20x20x30 cm",
+          "priceModifier": 18.00
+        }
+      ],
       "description": "Elegante vaso decorativo con pattern geometrico moderno. Perfetto per piante grasse o come elemento decorativo.",
       "features": [
         "Design geometrico unico",
@@ -106,21 +221,47 @@
         "Fondo anti-scivolo",
         "Facile da pulire"
       ],
-      "images": [
-        "https://iconichome.com/wp-content/uploads/iconic-home-vase-straight-3-set-shadow-grey-581x775.jpg",
-        "https://iconichome.com/wp-content/uploads/iconic-home-vase-shape-3-set-dreamy-grey-1.jpg"
-      ],
       "featured": true
     },
     {
       "id": "chess-set",
       "name": "Set Scacchi Moderno",
       "category": "miniatures",
-      "price": 45.00,
+      "basePrice": 45.00,
       "material": "pla",
-      "colors": ["Bianco/Nero", "Rosso/Blu"],
-      "dimensions": "40x40x8 cm",
-      "printTime": "12 ore",
+      "colors": [
+        {
+          "name": "Bianco/Nero",
+          "images": [
+            "https://images.pexels.com/photos/1040157/pexels-photo-1040157.jpeg",
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
+          ]
+        },
+        {
+          "name": "Rosso/Blu",
+          "images": [
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+            "https://images.pexels.com/photos/1040157/pexels-photo-1040157.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "25x25x5 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "40x40x8 cm",
+          "priceModifier": 15.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "60x60x10 cm",
+          "priceModifier": 35.00
+        }
+      ],
       "description": "Set completo di scacchi con design contemporaneo. Include scacchiera pieghevole e tutti i 32 pezzi.",
       "features": [
         "32 pezzi inclusi",
@@ -128,21 +269,54 @@
         "Design moderno",
         "Perfetto equilibrio"
       ],
-      "images": [
-        "https://images.pexels.com/photos/1040157/pexels-photo-1040157.jpeg",
-        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
-      ],
       "featured": false
     },
     {
       "id": "desk-organizer",
       "name": "Organizer da Scrivania",
       "category": "home",
-      "price": 18.50,
+      "basePrice": 18.50,
       "material": "abs",
-      "colors": ["Nero", "Bianco", "Grigio"],
-      "dimensions": "25x15x10 cm",
-      "printTime": "4 ore",
+      "colors": [
+        {
+          "name": "Nero",
+          "images": [
+            "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg",
+            "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg"
+          ]
+        },
+        {
+          "name": "Bianco",
+          "images": [
+            "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg",
+            "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg"
+          ]
+        },
+        {
+          "name": "Grigio",
+          "images": [
+            "https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg",
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "20x12x8 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "25x15x10 cm",
+          "priceModifier": 6.50
+        },
+        {
+          "name": "Large",
+          "dimensions": "30x20x12 cm",
+          "priceModifier": 12.00
+        }
+      ],
       "description": "Organizer multifunzionale per scrivania con scomparti per penne, clip, post-it e piccoli oggetti.",
       "features": [
         "Multipli scomparti",
@@ -150,21 +324,40 @@
         "Materiale resistente",
         "Design ergonomico"
       ],
-      "images": [
-        "https://images.pexels.com/photos/1181676/pexels-photo-1181676.jpeg",
-        "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg"
-      ],
       "featured": false
     },
     {
       "id": "custom-keychain",
       "name": "Portachiavi Personalizzato",
       "category": "gadgets",
-      "price": 5.99,
+      "basePrice": 5.99,
       "material": "pla",
-      "colors": ["Multicolore"],
-      "dimensions": "3x5x0.5 cm",
-      "printTime": "30 minuti",
+      "colors": [
+        {
+          "name": "Multicolore",
+          "images": [
+            "https://images.pexels.com/photos/4219654/pexels-photo-4219654.jpeg",
+            "https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "3x5x0.5 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "5x7x0.7 cm",
+          "priceModifier": 2.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "7x10x1 cm",
+          "priceModifier": 4.00
+        }
+      ],
       "description": "Portachiavi personalizzabile con nome, logo o design a scelta. Perfetto come regalo o gadget aziendale.",
       "features": [
         "Completamente personalizzabile",
@@ -172,21 +365,47 @@
         "Colori vivaci",
         "Consegna rapida"
       ],
-      "images": [
-        "https://images.pexels.com/photos/4219654/pexels-photo-4219654.jpeg",
-        "https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg"
-      ],
       "featured": false
     },
     {
       "id": "prototype-housing",
       "name": "Prototipo Involucro Elettronico",
       "category": "prototypes",
-      "price": 35.00,
+      "basePrice": 35.00,
       "material": "abs",
-      "colors": ["Grigio", "Nero"],
-      "dimensions": "10x6x3 cm",
-      "printTime": "5 ore",
+      "colors": [
+        {
+          "name": "Grigio",
+          "images": [
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+            "https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg"
+          ]
+        },
+        {
+          "name": "Nero",
+          "images": [
+            "https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg",
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "8x5x2 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "10x6x3 cm",
+          "priceModifier": 10.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "15x9x4 cm",
+          "priceModifier": 25.00
+        }
+      ],
       "description": "Prototipo di involucro per dispositivi elettronici. Ideale per test di form factor e assemblaggio.",
       "features": [
         "Precisione dimensionale",
@@ -194,31 +413,60 @@
         "Modificabile",
         "Tempi rapidi"
       ],
-      "images": [
-        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
-        "https://images.pexels.com/photos/1040173/pexels-photo-1040173.jpeg"
-      ],
       "featured": false
     },
     {
       "id": "plant-pot",
       "name": "Vaso per Piante Succulente",
       "category": "home",
-      "price": 12.99,
+      "basePrice": 12.99,
       "material": "petg",
-      "colors": ["Terracotta", "Bianco", "Verde"],
-      "dimensions": "8x8x6 cm",
-      "printTime": "2.5 ore",
+      "colors": [
+        {
+          "name": "Terracotta",
+          "images": [
+            "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg",
+            "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg"
+          ]
+        },
+        {
+          "name": "Bianco",
+          "images": [
+            "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg",
+            "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg"
+          ]
+        },
+        {
+          "name": "Verde",
+          "images": [
+            "https://images.pexels.com/photos/4219654/pexels-photo-4219654.jpeg",
+            "https://images.pexels.com/photos/3184357/pexels-photo-3184357.jpeg"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "name": "Small",
+          "dimensions": "8x8x6 cm",
+          "priceModifier": 0
+        },
+        {
+          "name": "Medium",
+          "dimensions": "12x12x9 cm",
+          "priceModifier": 5.00
+        },
+        {
+          "name": "Large",
+          "dimensions": "16x16x12 cm",
+          "priceModifier": 10.00
+        }
+      ],
       "description": "Piccolo vaso perfetto per piante grasse e succulente. Include foro di drenaggio e sottovaso.",
       "features": [
         "Foro di drenaggio",
         "Sottovaso incluso",
         "Dimensione perfetta",
         "Materiale food-safe"
-      ],
-      "images": [
-        "https://images.pexels.com/photos/1029615/pexels-photo-1029615.jpeg",
-        "https://images.pexels.com/photos/1598300/pexels-photo-1598300.jpeg"
       ],
       "featured": false
     }
