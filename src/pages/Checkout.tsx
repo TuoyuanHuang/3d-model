@@ -7,8 +7,8 @@ import CheckoutForm from '../components/CheckoutForm';
 
 // Delivery options constants
 const EXPRESS_DELIVERY_FREE_THRESHOLD = 100;
-const EXPRESS_DELIVERY_COST = 6.50;
-const STANDARD_DELIVERY_COST = 3.00;
+const EXPRESS_DELIVERY_COST = 10.90;
+const STANDARD_DELIVERY_COST = 4.90;
 
 const Checkout: React.FC = () => {
   const { user, session } = useAuth();
