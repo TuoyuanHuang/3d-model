@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import CheckoutForm from '../components/CheckoutForm';
 import LazyImage from '../components/LazyImage';
+import TermsAndPrivacyCheckbox from '../components/TermsAndPrivacyCheckbox';
 import productsData from '../data/products.json';
 
 interface ProductColor {
@@ -44,6 +45,8 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.user_metadata?.full_name || '',
     email: user?.email || '',
@@ -131,6 +134,13 @@ const ProductDetail: React.FC = () => {
       ...customerInfo,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleTermsChange = (checked: boolean) => {
+    setTermsAccepted(checked);
+    if (checked) {
+      setTermsError(false);
+    }
   };
 
   if (showCheckout) {
@@ -296,6 +306,14 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
               </div>
+              
+              {/* Terms and Privacy Policy Checkbox */}
+              <TermsAndPrivacyCheckbox
+                isChecked={termsAccepted}
+                onCheckedChange={handleTermsChange}
+                hasError={termsError}
+                errorMessage="Devi accettare i termini e le condizioni per procedere"
+              />
 
               <CheckoutForm
                 amount={currentPrice * quantity}
@@ -306,6 +324,7 @@ const ProductDetail: React.FC = () => {
                 sizeDimensions={selectedSize.dimensions}
                 quantity={quantity}
                 customerInfo={customerInfo}
+                termsAccepted={termsAccepted}
                 authToken={session?.access_token}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
