@@ -154,7 +154,7 @@ const Checkout: React.FC = () => {
                         className="h-4 w-4 text-blue-600"
                       />
                       <div className="ml-3 flex-1">
-                        <p className="text-sm font-medium text-gray-900">Spedizione Standard (5-7 giorni)</p>
+                        <p className="text-sm font-medium text-gray-900">Spedizione Standard (5-7 giorni lavorativi)</p>
                         <p className="text-xs text-gray-500">€{STANDARD_DELIVERY_COST.toFixed(2)}</p>
                       </div>
                     </label>
