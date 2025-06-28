@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { CreditCard, Lock, Package, User, MapPin, Truck } from 'lucide-react';
+import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck } from 'lucide-react';
 import CheckoutForm from '../components/CheckoutForm';
-import TermsAndPrivacyCheckbox from '../components/TermsAndPrivacyCheckbox';
 
 // Delivery options constants
 const EXPRESS_DELIVERY_FREE_THRESHOLD = 100;
@@ -48,26 +47,15 @@ const Checkout: React.FC = () => {
 
   // Validate form
   useEffect(() => {
-    const isValid = customerInfo.name.trim() !== '' && customerInfo.email.trim() !== '' && termsAccepted;
+    const isValid = customerInfo.name.trim() !== '' && customerInfo.email.trim() !== '';
     setFormValid(isValid);
-  }, [customerInfo, termsAccepted]);
-
-  // Terms and conditions state
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [termsError, setTermsError] = useState(false);
+  }, [customerInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerInfo({
       ...customerInfo,
       [e.target.name]: e.target.value
     });
-  };
-
-  const handleTermsChange = (checked: boolean) => {
-    setTermsAccepted(checked);
-    if (checked) {
-      setTermsError(false);
-    }
   };
 
   const handlePaymentSuccess = async (orderId: string) => {
@@ -212,14 +200,6 @@ const Checkout: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* Terms and Privacy Policy Checkbox */}
-              <TermsAndPrivacyCheckbox
-                isChecked={termsAccepted}
-                onCheckedChange={handleTermsChange}
-                hasError={termsError}
-                errorMessage="Devi accettare i termini e le condizioni per procedere"
-              />
             </div>
 
             {/* Security Notice */}

@@ -27,7 +27,6 @@ interface CheckoutFormProps {
   quantity?: number;
   deliveryMethod?: 'standard' | 'express';
   deliveryFee?: number;
-  termsAccepted?: boolean;
   customerInfo: {
     name: string;
     email: string;
@@ -52,7 +51,6 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   quantity = 1,
   deliveryMethod = 'standard',
   deliveryFee = 0,
-  termsAccepted = false,
   customerInfo,
   authToken,
   onSuccess, 
@@ -202,11 +200,6 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!termsAccepted) {
-      setErrorMessage('Devi accettare i termini e le condizioni per procedere');
-      return;
-    }
     
     if (!stripe || !elements) {
       setErrorMessage('Stripe non è ancora caricato. Riprova tra qualche secondo.');
