@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck } from 'lucide-react';
+import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck, AlertCircle } from 'lucide-react';
 import CheckoutForm from '../components/CheckoutForm';
 
 // Delivery options constants
@@ -17,6 +17,9 @@ const Checkout: React.FC = () => {
 
   // Delivery method state
   const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
+  
+  // Terms acceptance state
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -97,7 +100,6 @@ const Checkout: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -318,20 +320,59 @@ const Checkout: React.FC = () => {
               </div>
             </div>
 
+            {/* Terms and Conditions Checkbox */}
+            <div className="mb-6 border-t border-gray-200 pt-4">
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="terms" className="font-medium text-gray-700">
+                    Ho letto e accetto i <Link to="/terms-conditions" className="text-blue-600 hover:text-blue-800 underline" target="_blank">Termini e Condizioni</Link> e la <Link to="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline" target="_blank">Privacy Policy</Link>
+                  </label>
+                </div>
+              </div>
+              {!termsAccepted && formValid && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  È necessario accettare i termini e condizioni per procedere
+                </p>
+              )}
+            </div>
+
             {/* Payment Form */}
             {formValid ? (
-              <CheckoutForm
-                amount={finalTotal}
-                productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
-                productId="cart-order"
-                cartItems={items}
-                customerInfo={customerInfo}
-                deliveryMethod={deliveryMethod}
-                deliveryFee={deliveryFee}
-                authToken={session?.access_token}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              <>
+                {termsAccepted ? (
+                  <CheckoutForm
+                    amount={finalTotal}
+                    productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
+                    productId="cart-order"
+                    cartItems={items}
+                    customerInfo={customerInfo}
+                    deliveryMethod={deliveryMethod}
+                    deliveryFee={deliveryFee}
+                    authToken={session?.access_token}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                ) : (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-yellow-800 font-medium flex items-center">
+                      <AlertCircle className="h-5 w-5 mr-2" />
+                      Accetta i termini e condizioni per procedere al pagamento
+                    </p>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-yellow-800 font-medium">
@@ -342,6 +383,12 @@ const Checkout: React.FC = () => {
                 </p>
               </div>
             )}
+            
+            {/* Security Notice */}
+            <div className="mt-6 flex items-center text-sm text-gray-500">
+              <Lock className="h-4 w-4 mr-2 text-gray-400" />
+              <p>I tuoi dati di pagamento sono protetti e crittografati</p>
+            </div>
           </div>
         </div>
       </div>
