@@ -55,6 +55,16 @@ const Footer: React.FC = () => {
                   Contatti
                 </Link>
               </li>
+              <li>
+                <Link to="/privacy-policy" className="text-gray-300 hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-and-conditions" className="text-gray-300 hover:text-white transition-colors">
+                  Termini e Condizioni
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -79,7 +89,10 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} 3D su Misura. Tutti i diritti riservati.</p>
+          <p>&copy; {new Date().getFullYear()} 3D su Misura. Tutti i diritti riservati. | 
+            <Link to="/privacy-policy" className="ml-2 hover:text-white transition-colors">Privacy Policy</Link> | 
+            <Link to="/terms-and-conditions" className="ml-2 hover:text-white transition-colors">Termini e Condizioni</Link>
+          </p>
         </div>
       </div>
     </footer>

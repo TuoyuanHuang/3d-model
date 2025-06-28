@@ -23,6 +23,8 @@ const Profile = React.lazy(() => import('./pages/Profile'));
 const AdminLogin = React.lazy(() => import('./pages/AdminLogin'));
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsAndConditions = React.lazy(() => import('./pages/TermsAndConditions'));
 
 function App() {
   return (
@@ -64,8 +66,8 @@ function App() {
                         <Route path="/chi-siamo" element={<About />} />
                         <Route path="/catalogo" element={<Catalog />} />
                         <Route path="/contatti" element={<Contact />} />
-                        <Route path="/privacypolicy" element={<privacypolicy />} />
-                        <Route path="/contatti" element={<Contact />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
                         <Route path="/prodotto/:id" element={<ProductDetail />} />
                         <Route path="/login" element={<Login />} />
                         

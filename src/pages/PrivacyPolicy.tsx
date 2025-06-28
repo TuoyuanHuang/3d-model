@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const PrivacyPolicy = () => {
   return (
@@ -16,6 +17,13 @@ const PrivacyPolicy = () => {
 
       {/* Content Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <Link to="/" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Torna alla Home</span>
+          </Link>
+        </div>
+        
         <div className="prose prose-lg prose-blue mx-auto">
           <p className="text-lg">
             Questa Applicazione raccoglie alcuni Dati Personali dei propri Utenti.
@@ -27,15 +35,15 @@ const PrivacyPolicy = () => {
           
           <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Titolare del Trattamento dei Dati</h2>
           <p>
-            3DLAB - via U. Foscolo 219 A - Varese - Italia
+            3D su Misura - via Roma 123 - Milano - Italia
           </p>
           <p>
-            Indirizzo email del Titolare: <a href="mailto:clientcustom3dlab@gmail.com" className="text-blue-600 hover:text-blue-800">clientcustom3dlab@gmail.com</a>
+            Indirizzo email del Titolare: <a href="mailto:info@3dsumisura.it" className="text-blue-600 hover:text-blue-800">info@3dsumisura.it</a>
           </p>
           
           <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Tipologie di Dati raccolti</h2>
           <p>
-            Fra i Dati Personali raccolti da questa Applicazione, in modo autonomo o tramite terze parti, ci sono: Strumento di Tracciamento; Dati di utilizzo; nome; cognome; email; CAP; città; Codice Fiscale.
+            Fra i Dati Personali raccolti da questa Applicazione, in modo autonomo o tramite terze parti, ci sono: Strumento di Tracciamento; Dati di utilizzo; nome; cognome; email; CAP; città; indirizzo; numero di telefono.
           </p>
           <p>
             Dettagli completi su ciascuna tipologia di Dati Personali raccolti sono forniti nelle sezioni dedicate di questa privacy policy o mediante specifici testi informativi visualizzati prima della raccolta dei Dati stessi.
@@ -142,18 +150,6 @@ const PrivacyPolicy = () => {
           <div className="mt-12 pt-6 border-t border-gray-200 text-sm text-gray-500">
             <p>Ultimo aggiornamento: 27 giugno 2025</p>
           </div>
-        </div>
-      </div>
-      
-      {/* Back to Home Button */}
-      <div className="bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Link 
-            to="/" 
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Torna alla Home
-          </Link>
         </div>
       </div>
     </div>
