@@ -64,6 +64,8 @@ function App() {
                         <Route path="/chi-siamo" element={<About />} />
                         <Route path="/catalogo" element={<Catalog />} />
                         <Route path="/contatti" element={<Contact />} />
+                        <Route path="/privacypolicy" element={<privacypolicy />} />
+                        <Route path="/contatti" element={<Contact />} />
                         <Route path="/prodotto/:id" element={<ProductDetail />} />
                         <Route path="/login" element={<Login />} />
                         
