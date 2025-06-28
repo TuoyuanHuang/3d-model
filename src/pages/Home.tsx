@@ -4,6 +4,7 @@ import Hero from '../components/Hero';
 import { ArrowRight, Users, Award, Clock, Lightbulb, X } from 'lucide-react';
 import productsData from '../data/products.json';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import CookieBanner from '../components/CookieBanner';
 
 
 // Lazy load ProductCard component
