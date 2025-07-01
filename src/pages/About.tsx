@@ -86,48 +86,6 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      {/* Mission & Vision */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="bg-white rounded-lg p-8 shadow-sm">
-              <div className="flex items-center mb-6">
-                <Target className="h-8 w-8 text-blue-600 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-900">La Nostra Missione</h2>
-              </div>
-              <p className="text-gray-600 leading-relaxed">
-                Rendere accessibile la tecnologia di stampa 3D a tutti, dalle aziende ai privati, 
-                offrendo servizi di alta qualità, consulenza personalizzata e soluzioni innovative. 
-                Crediamo che ogni idea meriti di essere realizzata con precisione e cura.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-lg p-8 shadow-sm">
-              <div className="flex items-center mb-6">
-                <Heart className="h-8 w-8 text-red-500 mr-3" />
-                <h2 className="text-2xl font-bold text-gray-900">I Nostri Valori</h2>
-              </div>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-                  <span><strong>Qualità:</strong> Utilizziamo solo materiali premium e tecnologie all'avanguardia</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-                  <span><strong>Innovazione:</strong> Sempre alla ricerca di nuove soluzioni e miglioramenti</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
-                  <span><strong>Servizio:</strong> Supporto personalizzato per ogni cliente e progetto</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      
-
       {/* Technology Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,6 +129,48 @@ const About: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Mission & Vision */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="bg-white rounded-lg p-8 shadow-sm">
+              <div className="flex items-center mb-6">
+                <Target className="h-8 w-8 text-blue-600 mr-3" />
+                <h2 className="text-2xl font-bold text-gray-900">La Nostra Missione</h2>
+              </div>
+              <p className="text-gray-600 leading-relaxed">
+                Rendere accessibile la tecnologia di stampa 3D a tutti, dalle aziende ai privati, 
+                offrendo servizi di alta qualità, consulenza personalizzata e soluzioni innovative. 
+                Crediamo che ogni idea meriti di essere realizzata con precisione e cura.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg p-8 shadow-sm">
+              <div className="flex items-center mb-6">
+                <Heart className="h-8 w-8 text-red-500 mr-3" />
+                <h2 className="text-2xl font-bold text-gray-900">I Nostri Valori</h2>
+              </div>
+              <ul className="space-y-3 text-gray-600">
+                <li className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                  <span><strong>Qualità:</strong> Utilizziamo solo materiali premium e tecnologie all'avanguardia</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                  <span><strong>Innovazione:</strong> Sempre alla ricerca di nuove soluzioni e miglioramenti</span>
+                </li>
+                <li className="flex items-start space-x-3">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                  <span><strong>Servizio:</strong> Supporto personalizzato per ogni cliente e progetto</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
 
       {/* CTA Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
