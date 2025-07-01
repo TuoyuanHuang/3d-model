@@ -171,25 +171,6 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      
-
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-            Pronto a Realizzare la Tua Idea?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Contattaci per discutere del tuo progetto e scoprire come possiamo aiutarti
-          </p>
-          <a
-            href="/contatti"
-            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200"
-          >
-            Iniziamo Insieme
-          </a>
-        </div>
-      </section>
     </div>
   );
 };
