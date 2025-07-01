@@ -32,35 +32,6 @@ const About: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-                Chi Siamo
-              </h1>
-              <p className="text-xl text-blue-100 mb-8">
-                Siamo un team di professionisti appassionati che trasforma idee innovative 
-                in realtà tangibile attraverso la tecnologia di stampa 3D più avanzata.
-              </p>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Heart className="h-6 w-6 text-red-400" />
-                  <span className="text-blue-100">Passione per l'innovazione</span>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <img
-                src="https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg"
-                alt="Il nostro team al lavoro"
-                className="rounded-lg shadow-xl"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Technology Section */}
       <section className="py-16 bg-gray-50">
@@ -170,7 +141,6 @@ const About: React.FC = () => {
           </div>
         </div>
       </section>
-
     </div>
   );
 };
