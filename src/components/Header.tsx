@@ -14,7 +14,7 @@ const Header: React.FC = () => {
     { name: 'Home', href: '/' },
     { name: 'Catalogo', href: '/catalogo' },
     { name: 'Servizi su Misura', href: '/contatti' },
-    { name: 'Info', href: '/chi-siamo' },
+    { name: 'Informazioni', href: '/chi-siamo' },
   ];
 
   const isActive = (path: string) => {
