@@ -154,16 +154,7 @@
           "dimensions": "8x5x10 cm",
           "priceModifier": 0
         },
-        {
-          "name": "Medium",
-          "dimensions": "12x8x15 cm",
-          "priceModifier": 3.50
-        },
-        {
-          "name": "Large",
-          "dimensions": "16x10x20 cm",
-          "priceModifier": 7.00
-        }
+        
       ],
       "description": "Supporto ergonomico per smartphone con angolazione regolabile. Design moderno e funzionale per scrivania o comodino.",
       "features": [
