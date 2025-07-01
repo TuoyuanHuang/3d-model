@@ -13,8 +13,8 @@ const Header: React.FC = () => {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Catalogo', href: '/catalogo' },
+    { name: 'Servizi su misura', href: '/contatti' },
     { name: 'Chi Siamo', href: '/chi-siamo' },
-    { name: 'Contatti', href: '/contatti' },
   ];
 
   const isActive = (path: string) => {
