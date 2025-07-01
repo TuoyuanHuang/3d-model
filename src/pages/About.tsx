@@ -41,7 +41,7 @@ const About: React.FC = () => {
               Le Nostre Tecnologie
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Utilizziamo le tecnologie di stampa 3D più avanzate per garantire risultati eccellenti
+              Utilizziamo le tecnologie di stampa 3D più avanzate del momento, accostate a tecniche di finitura manuale, per garantire risultati eccellenti, caratteristici del migliore artigianato italiano.
             </p>
           </div>
 
