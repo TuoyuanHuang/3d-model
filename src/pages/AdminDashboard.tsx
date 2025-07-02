@@ -455,7 +455,7 @@ const AdminDashboard: React.FC = () => {
                               {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
                               {item.customer_note && (
                                 <MessageSquare 
-                                  className="h-4 w-4 ml-2 text-blue-600" 
+                                  className="h-5 w-4 ml-2 text-blue-600" 
                                   title="Contiene note del cliente"
                                 />
                               )}
