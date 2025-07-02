@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle, MessageSquare } from 'lucide-react';
+import { Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -17,12 +17,6 @@ interface Order {
     quantity: number;
     unit_price: number;
     selected_color?: string;
-    selected_size?: string;
-    size_dimensions?: string;
-    customer_note?: string;
-    selected_size?: string;
-    size_dimensions?: string;
-    customer_note?: string;
   }>;
 }
 
@@ -38,17 +32,14 @@ const Orders: React.FC = () => {
         const { data, error } = await supabase
           .from('orders')
           .select(`
-          *,
-          order_items (
-            product_name,
-            quantity,
-            unit_price,
-            selected_color,
-            selected_size,
-            size_dimensions,
-            customer_note
-          )
-        `)
+            *,
+            order_items (
+              product_name,
+              quantity,
+              unit_price,
+              selected_color
+            )
+          `)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -218,28 +209,18 @@ const Orders: React.FC = () => {
                       {order.order_items.map((item, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div>
-                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                                <span>Quantità: {item.quantity}</span>
-                                {item.selected_color && <span>Colore: {item.selected_color}</span>}
-                                {item.selected_size && <span>Dimensione: {item.selected_size}</span>}
-                                {item.customer_note && (
-                                  <div className="flex items-center text-blue-600">
-                                    <MessageSquare className="h-4 w-4 mr-1" />
-                                    <span className="truncate max-w-[150px]">{item.customer_note}</span>
-                                  </div>
-                                )}
+                            <p className="font-medium text-gray-900">{item.product_name}</p>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                              <span>Quantità: {item.quantity}</span>
+                              {item.selected_color && (
+                                <span>Colore: {item.selected_color}</span>
                               )}
                             </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                          <div className="text-right">
                             <p className="font-medium text-gray-900">€{item.unit_price.toFixed(2)}</p>
-                            {item.selected_color && <span>Colore: {item.selected_color}</span>}
-                            {item.selected_size && <span>Dimensione: {item.selected_size}</span>}
-                            {item.customer_note && (
-                              <div className="flex items-center text-blue-600">
-                                <MessageSquare className="h-4 w-4 mr-1" />
-                                <span className="truncate max-w-[150px]">{item.customer_note}</span>
-                              </div>
+                            {item.quantity > 1 && (
+                              <p className="text-sm text-gray-600">€{(item.unit_price * item.quantity).toFixed(2)} totale</p>
                             )}
                           </div>
                         </div>

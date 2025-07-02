@@ -47,17 +47,14 @@ const OrderDetail: React.FC = () => {
         const { data, error } = await supabase
           .from('orders')
           .select(`
-          *,
-          order_items (
-            product_name,
-            quantity,
-            unit_price,
-            selected_color,
-            selected_size,
-            size_dimensions,
-            customer_note
-          )
-        `)
+            *,
+            order_items (
+              product_name,
+              quantity,
+              unit_price,
+              selected_color
+            )
+          `)
           .eq('id', orderId)
           .maybeSingle();
 
@@ -215,29 +212,33 @@ const OrderDetail: React.FC = () => {
               </h2>
               <div className="space-y-4">
                 {order.order_items.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{item.product_name}</h3>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-1">
-                        <span>Quantità: {item.quantity}</span>
-                        {item.selected_color && <span>Colore: {item.selected_color}</span>}
-                        {item.selected_size && <span>Dimensione: {item.selected_size}</span>}
-                        {item.customer_note && (
-                          <div className="flex items-center text-blue-600">
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            <span>{item.customer_note}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">€{item.unit_price.toFixed(2)}</p>
-                      {item.quantity > 1 && (
-                        <p className="text-sm text-gray-600">€{(item.unit_price * item.quantity).toFixed(2)} totale</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+  <div key={index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+    <div>
+      <h3 className="font-medium text-gray-900">{item.product_name}</h3>
+      <div className="flex items-center">
+        <span>Quantità: {item.quantity}</span>
+        {item.selected_color && (
+          <span className="ml-4">Colore: {item.selected_color}</span>
+        )}
+        {item.customer_note && (
+          <div className="ml-4 flex items-center text-blue-600">
+            <MessageSquare className="h-4 w-4 mr-1" />
+            <span className="cursor-pointer hover:underline" onClick={() => alert(`Nota: ${item.customer_note}`)}>
+              Nota cliente
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="text-right">
+      <p className="font-medium text-gray-900">€{item.unit_price.toFixed(2)}</p>
+      {item.quantity > 1 && (
+        <p className="text-sm text-gray-600">€{(item.unit_price * item.quantity).toFixed(2)} totale</p>
+      )}
+    </div>
+  </div>
+))}
+
               </div>
               
               <div className="border-t border-gray-200 mt-6 pt-4">
