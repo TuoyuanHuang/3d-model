@@ -346,7 +346,7 @@ const Checkout: React.FC = () => {
                 </div>
                 <div className="ml-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-gray-700">
-                    Ho letto e accetto i <Link to="/terms-and-conditions" className="text-blue-600 hover:text-blue-800 underline" target="_blank">Termini e Condizioni</Link> e la <Link to="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline" target="_blank">Privacy Policy</Link>
+                    Ho letto e accetto i <Link to="/terms-and-conditions" className="text-blue-600 hover:text-blue-800 underline" target="_blank">Termini e Condizioni</Link> e la <Link to="/privacy-policy" className=\"text-blue-600 hover:text-blue-800 underline" target=\"_blank">Privacy Policy</Link>
                   </label>
                 </div>
               </div>
