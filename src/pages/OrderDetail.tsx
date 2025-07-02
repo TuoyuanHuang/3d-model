@@ -29,9 +29,6 @@ interface OrderDetail {
     selected_size?: string;
     size_dimensions?: string;
     customer_note?: string;
-    selected_size?: string;
-    size_dimensions?: string;
-    customer_note?: string;
   }>;
 }
 
@@ -228,11 +225,6 @@ const OrderDetail: React.FC = () => {
                         {item.customer_note && (
                           <div className="flex items-center text-blue-600">
                             <MessageSquare className="h-4 w-4 mr-1" />
-                        {item.selected_color && <span>Colore: {item.selected_color}</span>}
-                        {item.selected_size && <span>Dimensione: {item.selected_size} {item.size_dimensions && `(${item.size_dimensions})`}</span>}
-                        {item.customer_note && (
-                          <div className="flex items-center text-blue-600">
-                            <MessageSquare className="h-4 w-4 mr-1" />
                             <span>{item.customer_note}</span>
                           </div>
                         )}
@@ -246,7 +238,6 @@ const OrderDetail: React.FC = () => {
                     </div>
                   </div>
                 ))}
-
               </div>
               
               <div className="border-t border-gray-200 mt-6 pt-4">
