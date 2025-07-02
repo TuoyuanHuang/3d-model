@@ -487,23 +487,23 @@ const AdminDashboard: React.FC = () => {
                                 {item.selected_color && (
                                   <span className="text-gray-600 ml-2">({item.selected_color})</span>
                                 )}
-                                    <span className="text-gray-600 mr-2">{item.selected_color}</span>
-                              <div className="text-right">
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        alert(item.customer_note ? `Nota cliente: ${item.customer_note}` : "Nessuna nota cliente per questo prodotto");
-                                      }}
-                                      className={`${item.customer_note ? "text-blue-600" : "text-gray-400"} hover:text-blue-800`}
-                                      title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
-                                    >
-                                      <button 
-                                  {item.customer_note && (
-                                    <div className="flex items-center text-blue-600">
-                                      <MessageSquare className="h-4 w-4 mr-1" />
-                                      <span className="text-sm">{item.customer_note}</span>
-                                    </div>
-                                  )}
-                                  </div>
+                                <span className="text-gray-600 mr-2">{item.selected_color}</span>
+                                <div className="text-right">
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      alert(item.customer_note ? `Nota cliente: ${item.customer_note}` : "Nessuna nota cliente per questo prodotto");
+                                    }}
+                                    className={`${item.customer_note ? "text-blue-600" : "text-gray-400"} hover:text-blue-800`}
+                                    title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
+                                  >
+                                    {item.customer_note && (
+                                      <div className="flex items-center text-blue-600">
+                                        <MessageSquare className="h-4 w-4 mr-1" />
+                                        <span className="text-sm">{item.customer_note}</span>
+                                      </div>
+                                    )}
+                                  </button>
                                 </div>
                               </div>
                             </div>
