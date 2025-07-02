@@ -33,11 +33,9 @@ const Cart: React.FC = () => {
 
   const saveNote = async (itemId: string) => {
     try {
-      // This is a simplified approach - in a real implementation, you would need to 
-      // create a new function in your CartContext and Supabase RPC to update just the note
       const item = items.find(i => i.id === itemId);
       if (item) {
-        await updateQuantity(itemId, item.quantity); // Reuse existing function as a workaround
+        await updateQuantity(itemId, item.quantity, tempNote); // Pass the note to updateQuantity
         cancelEditingNote();
       }
     } catch (error) {

@@ -30,7 +30,7 @@ interface CartContextType {
     sizeDimensions?: string,
     customerNote?: string
   ) => Promise<void>;
-  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  updateQuantity: (itemId: string, quantity: number, customerNote?: string) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
@@ -110,12 +110,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateQuantity = async (itemId: string, quantity: number) => {
+  const updateQuantity = async (itemId: string, quantity: number, customerNote?: string) => {
     try {
       setLoading(true);
       const { data, error } = await supabase.rpc('update_cart_item_quantity', {
         p_cart_item_id: itemId,
-        p_quantity: quantity
+        p_quantity: quantity,
+        p_customer_note: customerNote
       });
 
       if (error) throw error;
