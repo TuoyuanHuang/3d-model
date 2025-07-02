@@ -29,6 +29,9 @@ interface OrderDetail {
     selected_size?: string;
     size_dimensions?: string;
     customer_note?: string;
+    selected_size?: string;
+    size_dimensions?: string;
+    customer_note?: string;
   }>;
 }
 
@@ -47,14 +50,17 @@ const OrderDetail: React.FC = () => {
         const { data, error } = await supabase
           .from('orders')
           .select(`
-            *,
-            order_items (
-              product_name,
-              quantity,
-              unit_price,
-              selected_color
-            )
-          `)
+          *,
+          order_items (
+            product_name,
+            quantity,
+            unit_price,
+            selected_color,
+            selected_size,
+            size_dimensions,
+            customer_note
+          )
+        `)
           .eq('id', orderId)
           .maybeSingle();
 
@@ -219,6 +225,11 @@ const OrderDetail: React.FC = () => {
                         <span>Quantità: {item.quantity}</span>
                         {item.selected_color && <span>Colore: {item.selected_color}</span>}
                         {item.selected_size && <span>Dimensione: {item.selected_size}</span>}
+                        {item.customer_note && (
+                          <div className="flex items-center text-blue-600">
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                        {item.selected_color && <span>Colore: {item.selected_color}</span>}
+                        {item.selected_size && <span>Dimensione: {item.selected_size} {item.size_dimensions && `(${item.size_dimensions})`}</span>}
                         {item.customer_note && (
                           <div className="flex items-center text-blue-600">
                             <MessageSquare className="h-4 w-4 mr-1" />
