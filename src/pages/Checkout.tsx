@@ -114,10 +114,20 @@ const Checkout: React.FC = () => {
                 <div key={item.id} className="flex justify-between items-center">
                   <div>
                     <h3 className="font-medium text-gray-900">{item.product_name}</h3>
-                    <div className="text-sm text-gray-600">
-                      <span>Quantità: {item.quantity}</span>
-                      {item.selected_color && (
-                        <span className="ml-4">Colore: {item.selected_color}</span>
+                        <div className="flex flex-wrap items-center">
+                          <span>Quantità: {item.quantity}</span>
+                          {item.selected_color && (
+                            <span className="ml-4">Colore: {item.selected_color}</span>
+                          )}
+                          {item.customer_note && (
+                            <div className="ml-4 flex items-center text-blue-600">
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              <span className="cursor-pointer hover:underline" onClick={() => alert(`Nota: ${item.customer_note}`)}>
+                                Nota cliente
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, Package } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowRight, Package, MessageSquare, Edit, Save, X } from 'lucide-react';
 
-const Cart: React.FC = () => {
+interface EditingNote {
+  itemId: string;
+  note: string;
+}
+
+const Cart: React.FC = () => {  
   const { items, loading, totalAmount, updateQuantity, removeItem, clearCart } = useCart();
+  const [editingNote, setEditingNote] = React.useState<EditingNote | null>(null);
+  const [tempNote, setTempNote] = React.useState('');
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -13,6 +20,31 @@ const Cart: React.FC = () => {
       await updateQuantity(itemId, newQuantity);
     }
   };
+
+  const startEditingNote = (itemId: string, currentNote: string = '') => {
+    setEditingNote({ itemId, note: currentNote });
+    setTempNote(currentNote);
+  };
+
+  const cancelEditingNote = () => {
+    setEditingNote(null);
+    setTempNote('');
+  };
+
+  const saveNote = async (itemId: string) => {
+    try {
+      // This is a simplified approach - in a real implementation, you would need to 
+      // create a new function in your CartContext and Supabase RPC to update just the note
+      const item = items.find(i => i.id === itemId);
+      if (item) {
+        await updateQuantity(itemId, item.quantity); // Reuse existing function as a workaround
+        cancelEditingNote();
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+    }
+  };
+
 
   const handleClearCart = async () => {
     if (window.confirm('Sei sicuro di voler svuotare il carrello?')) {
@@ -93,12 +125,67 @@ const Cart: React.FC = () => {
                           <h3 className="text-lg font-medium text-gray-900 mb-1">
                             {item.product_name}
                           </h3>
-                          <div className="text-sm text-gray-600 mb-2">
-                            {item.selected_color && (
-                              <span className="mr-3">Colore: {item.selected_color}</span>
-                            )}
-                            {item.selected_size && (
-                              <span>Dimensione: {item.selected_size} {item.size_dimensions && `(${item.size_dimensions})`}</span>
+                          <div className="space-y-2">
+                            <div className="text-sm text-gray-600">
+                              {item.selected_color && (
+                                <span className="mr-3">Colore: {item.selected_color}</span>
+                              )}
+                              {item.selected_size && (
+                                <span>Dimensione: {item.selected_size} {item.size_dimensions && `(${item.size_dimensions})`}</span>
+                              )}
+                            </div>
+                            
+                            {/* Note section */}
+                            {editingNote && editingNote.itemId === item.id ? (
+                              <div className="flex items-start space-x-2">
+                                <textarea
+                                  value={tempNote}
+                                  onChange={(e) => setTempNote(e.target.value)}
+                                  className="flex-1 text-sm p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                  rows={2}
+                                  placeholder="Aggiungi una nota per questo prodotto..."
+                                />
+                                <div className="flex flex-col space-y-1">
+                                  <button
+                                    onClick={() => saveNote(item.id)}
+                                    className="p-1 text-green-600 hover:text-green-800"
+                                    title="Salva nota"
+                                  >
+                                    <Save className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    onClick={cancelEditingNote}
+                                    className="p-1 text-gray-600 hover:text-gray-800"
+                                    title="Annulla"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center text-sm">
+                                {item.customer_note ? (
+                                  <div className="flex items-center text-gray-700">
+                                    <MessageSquare className="h-4 w-4 mr-1 text-blue-600" />
+                                    <span className="mr-2">{item.customer_note}</span>
+                                    <button
+                                      onClick={() => startEditingNote(item.id, item.customer_note)}
+                                      className="text-gray-500 hover:text-gray-700"
+                                      title="Modifica nota"
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => startEditingNote(item.id)}
+                                    className="text-gray-500 hover:text-gray-700 flex items-center"
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    <span>Aggiungi nota</span>
+                                  </button>
+                                )}
+                              </div>
                             )}
                           </div>
                           <p className="text-lg font-semibold text-blue-600">

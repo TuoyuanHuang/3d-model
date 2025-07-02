@@ -24,6 +24,7 @@ interface CheckoutFormProps {
   selectedColor?: string;
   selectedSize?: string;
   sizeDimensions?: string;
+  customerNote?: string;
   quantity?: number;
   deliveryMethod?: 'standard' | 'express';
   deliveryFee?: number;
@@ -48,6 +49,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   selectedColor,
   selectedSize,
   sizeDimensions,
+  customerNote,
   quantity = 1,
   deliveryMethod = 'standard',
   deliveryFee = 0,
@@ -162,6 +164,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       selectedColor,
       selectedSize,
       sizeDimensions,
+      customerNote,
       quantity,
       deliveryMethod,
       deliveryFee,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle, Mail, Phone, MapPin, MessageSquare } from 'lucide-react';
 
 interface OrderDetail {
   id: string;
@@ -26,6 +26,9 @@ interface OrderDetail {
     quantity: number;
     unit_price: number;
     selected_color?: string;
+    selected_size?: string;
+    size_dimensions?: string;
+    customer_note?: string;
   }>;
 }
 
@@ -212,10 +215,20 @@ const OrderDetail: React.FC = () => {
                   <div key={index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                     <div>
                       <h3 className="font-medium text-gray-900">{item.product_name}</h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                        <span>Quantità: {item.quantity}</span>
-                        {item.selected_color && (
-                          <span>Colore: {item.selected_color}</span>
+                          <div className="flex items-center">
+                            <span>Quantità: {item.quantity}</span>
+                            {item.selected_color && (
+                              <span className="ml-4">Colore: {item.selected_color}</span>
+                            )}
+                            {item.customer_note && (
+                              <div className="ml-4 flex items-center text-blue-600">
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                <span className="cursor-pointer hover:underline" onClick={() => alert(`Nota: ${item.customer_note}`)}>
+                                  Nota cliente
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

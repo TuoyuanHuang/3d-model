@@ -10,6 +10,7 @@ interface CartItem {
   selected_color?: string;
   selected_size?: string;
   size_dimensions?: string;
+  customer_note?: string;
   created_at: string;
   updated_at: string;
 }
@@ -26,7 +27,8 @@ interface CartContextType {
     quantity?: number, 
     selectedColor?: string,
     selectedSize?: string,
-    sizeDimensions?: string
+    sizeDimensions?: string,
+    customerNote?: string
   ) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
@@ -78,7 +80,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     quantity: number = 1,
     selectedColor?: string,
     selectedSize?: string,
-    sizeDimensions?: string
+    sizeDimensions?: string,
+    customerNote?: string
   ) => {
     if (!user) {
       throw new Error('User must be logged in to add items to cart');
@@ -93,7 +96,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         p_quantity: quantity,
         p_selected_color: selectedColor,
         p_selected_size: selectedSize,
-        p_size_dimensions: sizeDimensions
+        p_size_dimensions: sizeDimensions,
+        p_customer_note: customerNote
       });
 
       if (error) throw error;

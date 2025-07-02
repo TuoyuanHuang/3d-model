@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
-  Truck
+  Truck,
+  MessageSquare
 } from 'lucide-react';
 
 interface Order {
@@ -44,6 +45,9 @@ interface Order {
     quantity: number;
     unit_price: number;
     selected_color?: string;
+    selected_size?: string;
+    size_dimensions?: string;
+    customer_note?: string;
   }>;
 }
 
@@ -446,8 +450,16 @@ const AdminDashboard: React.FC = () => {
                       <div className="text-sm text-gray-600">
                         {order.order_items.slice(0, 2).map((item, index) => (
                           <div key={index}>
-                            {item.quantity}x {item.product_name}
-                            {item.selected_color && ` (${item.selected_color})`}
+                            <div className="flex items-center">
+                              <span>{item.quantity}x {item.product_name}</span>
+                              {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
+                              {item.customer_note && (
+                                <MessageSquare 
+                                  className="h-4 w-4 ml-2 text-blue-600" 
+                                  title="Contiene note del cliente"
+                                />
+                              )}
+                            </div>
                           </div>
                         ))}
                         {order.order_items.length > 2 && (
@@ -481,8 +493,22 @@ const AdminDashboard: React.FC = () => {
                                   {item.quantity} x €{item.unit_price.toFixed(2)}
                                 </div>
                                 <div className="font-medium">
-                                  €{(item.quantity * item.unit_price).toFixed(2)}
-                                </div>
+                              <div className="flex items-center">
+                                {item.selected_color && (
+                                  <span className="text-gray-600 mr-2">({item.selected_color})</span>
+                                )}
+                                {item.customer_note && (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      alert(`Nota cliente: ${item.customer_note}`);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    title="Nota cliente"
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                           ))}

@@ -44,6 +44,7 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [customerNote, setCustomerNote] = useState('');
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.user_metadata?.full_name || '',
     email: user?.email || '',
@@ -100,7 +101,8 @@ const ProductDetail: React.FC = () => {
         quantity, 
         selectedColor.name,
         selectedSize.name,
-        selectedSize.dimensions
+        selectedSize.dimensions,
+        customerNote.trim() || undefined
       );
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -304,6 +306,7 @@ const ProductDetail: React.FC = () => {
                 selectedColor={selectedColor.name}
                 selectedSize={selectedSize.name}
                 sizeDimensions={selectedSize.dimensions}
+                customerNote={customerNote}
                 quantity={quantity}
                 customerInfo={customerInfo}
                 authToken={session?.access_token}
@@ -498,6 +501,22 @@ const ProductDetail: React.FC = () => {
                 </ul>
               </div>
             )}
+
+            {/* Customer Note */}
+            <div>
+              <label htmlFor="customerNote" className="block text-lg font-semibold text-gray-900 mb-3">
+                Note per il Prodotto (opzionale)
+              </label>
+              <textarea
+                id="customerNote"
+                name="customerNote"
+                rows={3}
+                value={customerNote}
+                onChange={(e) => setCustomerNote(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                placeholder="Es: 'Vorrei questo prodotto con una finitura opaca', 'Si prega di incidere le iniziali AB'"
+              />
+            </div>
 
             {/* CTA Buttons */}
             <div className="space-y-3">

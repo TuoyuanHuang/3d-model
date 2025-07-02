@@ -30,6 +30,7 @@ interface CartItem {
   selected_color?: string;
   selected_size?: string;
   size_dimensions?: string;
+  customer_note?: string;
 }
 
 interface CreatePaymentIntentRequest {
@@ -41,6 +42,7 @@ interface CreatePaymentIntentRequest {
   selectedColor?: string;
   selectedSize?: string;
   sizeDimensions?: string;
+  customerNote?: string;
   deliveryMethod?: 'standard' | 'express';
   deliveryFee?: number;
   cartItems?: CartItem[];
@@ -249,7 +251,8 @@ Deno.serve(async (req) => {
         unit_price: item.unit_price,
         selected_color: item.selected_color || null,
         selected_size: item.selected_size || null,
-        size_dimensions: item.size_dimensions || null
+        size_dimensions: item.size_dimensions || null,
+        customer_note: item.customer_note || null
       }))
 
       const { error: orderItemsError } = await supabase
@@ -271,7 +274,8 @@ Deno.serve(async (req) => {
           unit_price: requestData.amount / 100, // Convert from cents to euros
           selected_color: requestData.selectedColor || null,
           selected_size: requestData.selectedSize || null,
-          size_dimensions: requestData.sizeDimensions || null
+          size_dimensions: requestData.sizeDimensions || null,
+          customer_note: requestData.customerNote || null
         })
 
       if (orderItemError) {

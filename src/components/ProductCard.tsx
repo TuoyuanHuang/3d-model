@@ -63,8 +63,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         currentPrice, 
         1, 
         selectedColor.name,
-        defaultSize.name,
-        defaultSize.dimensions
+        defaultSize.name, 
+        defaultSize.dimensions,
+        undefined // No customer note from product card
       );
     } catch (error) {
       console.error('Error adding to cart:', error);
