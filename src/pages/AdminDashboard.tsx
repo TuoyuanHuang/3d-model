@@ -493,22 +493,24 @@ const AdminDashboard: React.FC = () => {
                                   {item.quantity} x €{item.unit_price.toFixed(2)}
                                 </div>
                                 <div className="font-medium">
-                              <div className="flex items-center">
-                                {item.selected_color && (
-                                  <span className="text-gray-600 mr-2">({item.selected_color})</span>
-                                )}
-                                {item.customer_note && (
-                                  <button 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      alert(`Nota cliente: ${item.customer_note}`);
-                                    }}
-                                    className="text-blue-600 hover:text-blue-800"
-                                    title="Nota cliente"
-                                  >
-                                    <MessageSquare className="h-4 w-4" />
-                                  </button>
-                                )}
+                                  <div className="flex items-center">
+                                    {item.selected_color && (
+                                      <span className="text-gray-600 mr-2">({item.selected_color})</span>
+                                    )}
+                                    {item.customer_note && (
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          alert(`Nota cliente: ${item.customer_note}`);
+                                        }}
+                                        className="text-blue-600 hover:text-blue-800"
+                                        title="Nota cliente"
+                                      >
+                                        <MessageSquare className="h-4 w-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}
