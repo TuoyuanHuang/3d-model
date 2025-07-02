@@ -7,7 +7,6 @@ import {
   TrendingUp, 
   Calendar,
   Search,
-  Filter,
   Download,
   Eye,
   LogOut,
@@ -88,7 +87,10 @@ const AdminDashboard: React.FC = () => {
             product_name,
             quantity,
             unit_price,
-            selected_color
+            selected_color,
+            selected_size,
+            size_dimensions,
+            customer_note
           )
         `)
         .order('created_at', { ascending: false });
@@ -449,28 +451,21 @@ const AdminDashboard: React.FC = () => {
                       <h4 className="font-medium text-gray-900 mb-2">Prodotti</h4>
                       <div className="text-sm text-gray-600">
                         {order.order_items.slice(0, 2).map((item, index) => (
-                          <div key={index}>
-                            <div className="flex items-center">
-                              <span>{item.quantity}x {item.product_name}</span>
-                              {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
+                          <div key={index} className="flex items-center">
+                            <span>{item.quantity}x {item.product_name}</span>
+                            {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
+                            {item.customer_note && (
                               <button 
-  onClick={(e) => {
-    e.stopPropagation(); // Prevent triggering parent click handlers
-    if (item.customer_note) {
-      alert(`Nota cliente:\n\n${item.customer_note}`);
-    } else {
-      alert("Nessuna nota cliente per questo prodotto");
-    }
-  }}
-  className={`p-1 rounded hover:bg-gray-100 ${
-    item.customer_note ? "text-blue-600" : "text-gray-400"
-  }`}
-  title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
->
-  <MessageSquare className="h-4 w-4" />
-</button>
-
-                            </div>
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  alert(`Nota cliente:\n\n${item.customer_note}`);
+                                }}
+                                className="ml-2 text-blue-600 hover:text-blue-800"
+                                title="Nota cliente"
+                              >
+                                <MessageSquare className="h-4 w-4" />
+                              </button>
+                            )}
                           </div>
                         ))}
                         {order.order_items.length > 2 && (
@@ -503,41 +498,18 @@ const AdminDashboard: React.FC = () => {
                                 <div className="text-sm text-gray-600">
                                   {item.quantity} x €{item.unit_price.toFixed(2)}
                                 </div>
-                                <div className="font-medium">
-                                  <div className="flex items-center">
-                                    {item.selected_color && (
-                                      <span className="text-gray-600 mr-2">({item.selected_color})</span>
-                                    )}
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        alert(item.customer_note ? `Nota cliente: ${item.customer_note}` : "Nessuna nota cliente per questo prodotto");
-                                      }}
-                                      className={`${item.customer_note ? "text-blue-600" : "text-gray-400"} hover:text-blue-800`}
-                                      title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
-                                    >
-                                      <button 
-  onClick={(e) => {
-    e.stopPropagation(); // Prevent triggering parent click handlers
-    if (item.customer_note) {
-      alert(`Nota cliente:\n\n${item.customer_note}`);
-    } else {
-      alert("Nessuna nota cliente per questo prodotto");
-    }
-  }}
-  className={`p-1 rounded hover:bg-gray-100 ${
-    item.customer_note ? "text-blue-600" : "text-gray-400"
-  }`}
-  title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
->
-  <MessageSquare className="h-4 w-4" />
-</button>
-
-
-                                      
-                                    </button>
-                                  </div>
-                                </div>
+                                {item.customer_note && (
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      alert(`Nota cliente:\n\n${item.customer_note}`);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800 mt-1"
+                                    title="Nota cliente"
+                                  >
+                                    <MessageSquare className="h-4 w-4" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                           ))}
