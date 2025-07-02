@@ -453,10 +453,23 @@ const AdminDashboard: React.FC = () => {
                             <div className="flex items-center">
                               <span>{item.quantity}x {item.product_name}</span>
                               {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
-                              <MessageSquare 
-                                className="h-5 w-4 ml-2 text-blue-600" 
-                                title={item.customer_note ? "Contiene note del cliente" : "Nessuna nota cliente"}
-                              />
+                              <button 
+  onClick={(e) => {
+    e.stopPropagation(); // Prevent triggering parent click handlers
+    if (item.customer_note) {
+      alert(`Nota cliente:\n\n${item.customer_note}`);
+    } else {
+      alert("Nessuna nota cliente per questo prodotto");
+    }
+  }}
+  className={`p-1 rounded hover:bg-gray-100 ${
+    item.customer_note ? "text-blue-600" : "text-gray-400"
+  }`}
+  title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
+>
+  <MessageSquare className="h-4 w-4" />
+</button>
+
                             </div>
                           </div>
                         ))}
@@ -503,7 +516,25 @@ const AdminDashboard: React.FC = () => {
                                       className={`${item.customer_note ? "text-blue-600" : "text-gray-400"} hover:text-blue-800`}
                                       title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
                                     >
-                                      <MessageSquare className="h-4 w-4" />
+                                      <button 
+  onClick={(e) => {
+    e.stopPropagation(); // Prevent triggering parent click handlers
+    if (item.customer_note) {
+      alert(`Nota cliente:\n\n${item.customer_note}`);
+    } else {
+      alert("Nessuna nota cliente per questo prodotto");
+    }
+  }}
+  className={`p-1 rounded hover:bg-gray-100 ${
+    item.customer_note ? "text-blue-600" : "text-gray-400"
+  }`}
+  title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
+>
+  <MessageSquare className="h-4 w-4" />
+</button>
+
+
+                                      
                                     </button>
                                   </div>
                                 </div>
