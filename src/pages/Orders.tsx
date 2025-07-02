@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Package, Calendar, CreditCard, Truck, CheckCircle, Clock, AlertCircle, MessageSquare } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -17,6 +17,9 @@ interface Order {
     quantity: number;
     unit_price: number;
     selected_color?: string;
+    selected_size?: string;
+    size_dimensions?: string;
+    customer_note?: string;
   }>;
 }
 
@@ -209,11 +212,16 @@ const Orders: React.FC = () => {
                       {order.order_items.map((item, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <div>
-                            <p className="font-medium text-gray-900">{item.product_name}</p>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
-                              <span>Quantità: {item.quantity}</span>
-                              {item.selected_color && (
-                                <span>Colore: {item.selected_color}</span>
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                                <span>Quantità: {item.quantity}</span>
+                                {item.selected_color && <span>Colore: {item.selected_color}</span>}
+                                {item.selected_size && <span>Dimensione: {item.selected_size}</span>}
+                                {item.customer_note && (
+                                  <div className="flex items-center text-blue-600">
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    <span className="truncate max-w-[150px]">{item.customer_note}</span>
+                                  </div>
+                                )}
                               )}
                             </div>
                           </div>
