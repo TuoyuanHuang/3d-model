@@ -453,12 +453,10 @@ const AdminDashboard: React.FC = () => {
                             <div className="flex items-center">
                               <span>{item.quantity}x {item.product_name}</span>
                               {item.selected_color && <span className="ml-1">({item.selected_color})</span>}
-                              {item.customer_note && (
-                                <MessageSquare 
-                                  className="h-5 w-4 ml-2 text-blue-600" 
-                                  title="Contiene note del cliente"
-                                />
-                              )}
+                              <MessageSquare 
+                                className="h-5 w-4 ml-2 text-blue-600" 
+                                title={item.customer_note ? "Contiene note del cliente" : "Nessuna nota cliente"}
+                              />
                             </div>
                           </div>
                         ))}
@@ -497,18 +495,16 @@ const AdminDashboard: React.FC = () => {
                                     {item.selected_color && (
                                       <span className="text-gray-600 mr-2">({item.selected_color})</span>
                                     )}
-                                    {item.customer_note && (
-                                      <button 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          alert(`Nota cliente: ${item.customer_note}`);
-                                        }}
-                                        className="text-blue-600 hover:text-blue-800"
-                                        title="Nota cliente"
-                                      >
-                                        <MessageSquare className="h-4 w-4" />
-                                      </button>
-                                    )}
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        alert(item.customer_note ? `Nota cliente: ${item.customer_note}` : "Nessuna nota cliente per questo prodotto");
+                                      }}
+                                      className={`${item.customer_note ? "text-blue-600" : "text-gray-400"} hover:text-blue-800`}
+                                      title={item.customer_note ? "Nota cliente" : "Nessuna nota cliente"}
+                                    >
+                                      <MessageSquare className="h-4 w-4" />
+                                    </button>
                                   </div>
                                 </div>
                               </div>
