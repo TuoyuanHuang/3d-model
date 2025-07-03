@@ -35,7 +35,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
-  const { addToCart, loading } = useCart();
+  const { addToCart } = useCart(); // Rimossa la proprietà 'loading'
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -70,7 +70,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     } catch (error) {
       console.error('Error adding to cart:', error);
     } finally {
-      setIsAdding(false);
+      // Aggiunto un timeout per un feedback visivo migliore
+      setTimeout(() => setIsAdding(false), 500);
     }
   };
 
@@ -156,13 +157,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           
           <button
             onClick={handleAddToCart}
-            disabled={isAdding || loading}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 group"
+            disabled={isAdding}
+            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 ${
+              isAdding 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
           >
             {isAdding ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Aggiunta...</span>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <span>Aggiungendo...</span>
               </>
             ) : (
               <>
