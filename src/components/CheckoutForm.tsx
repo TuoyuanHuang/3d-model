@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
 import { CreditCard, Lock, CheckCircle, AlertCircle, Smartphone, Loader2 } from 'lucide-react';
@@ -68,6 +68,12 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const [canMakePayment, setCanMakePayment] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>('');
   const [paymentMethodAvailable, setPaymentMethodAvailable] = useState<'card' | 'paymentRequest'>('card');
+  
+  // Track if payment intent has been created
+  const paymentIntentCreated = useRef(false);
+  
+  // Track if payment request is being processed
+  const isProcessingPaymentRequest = useRef(false);
 
   // Initialize Payment Request (for Google Pay / Apple Pay)
   useEffect(() => {
@@ -98,7 +104,9 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         setIsLoading(true);
         setPaymentStatus('processing');
         setErrorMessage('');
+        isProcessingPaymentRequest.current = true;
 
+        // Create payment intent if not already created
         if (!clientSecret) {
           const response = await createPaymentIntent();
           setClientSecret(response.clientSecret);
@@ -140,9 +148,10 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         handlePaymentError(error);
       } finally {
         setIsLoading(false);
+        isProcessingPaymentRequest.current = false;
       }
     });
-  }, [stripe, amount, productName, clientSecret]);
+  }, [stripe, amount, productName]);
 
   const createPaymentIntent = async () => {
     validateCustomerInfo();
@@ -179,6 +188,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
     const result = await response.json();
     setClientSecret(result.clientSecret);
+    paymentIntentCreated.current = true;
     return result;
   };
 
@@ -237,10 +247,10 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     setErrorMessage('');
 
     try {
-      if (!clientSecret) {
+      // Create payment intent if not already created
+      if (!clientSecret && !paymentIntentCreated.current) {
         const response = await createPaymentIntent();
         setClientSecret(response.clientSecret);
-        setOrderId(response.orderId);
       }
 
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
