@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, Info, ShoppingCart, Plus } from 'lucide-react';
+import { Star, Info, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import LazyImage from './LazyImage';
+import toast from 'react-hot-toast';
 
 interface ProductColor {
   name: string;
   images: string[];
+  hexCode?: string;
 }
 
 interface ProductSize {
@@ -35,7 +37,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuth();
-  const { addToCart } = useCart(); // Rimossa la proprietà 'loading'
+  const { addToCart } = useCart();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -65,12 +67,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         selectedColor.name,
         defaultSize.name, 
         defaultSize.dimensions,
-        undefined // No customer note from product card
+        undefined
+      );
+      
+      // Mostra notifica di successo
+      toast.success(
+        <div>
+          <span className="font-medium">{product.name}</span> aggiunto al carrello!
+        </div>,
+        {
+          icon: '🛒',
+          position: 'bottom-right',
+          duration: 2000,
+          style: {
+            background: '#10B981',
+            color: '#fff',
+          },
+        }
       );
     } catch (error) {
       console.error('Error adding to cart:', error);
+      toast.error(
+        'Errore durante l\'aggiunta al carrello. Riprova.',
+        {
+          position: 'bottom-right',
+          duration: 3000,
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+          },
+        }
+      );
     } finally {
-      // Aggiunto un timeout per un feedback visivo migliore
       setTimeout(() => setIsAdding(false), 500);
     }
   };
@@ -78,11 +106,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden group">
       <div className="relative overflow-hidden">
-        <Link to={`/prodotto/${product.id}`}>
+        <Link 
+          to={`/prodotto/${product.id}`}
+          aria-label={`Vai alla pagina dettagli di ${product.name}`}
+        >
           <LazyImage
             src={selectedColor.images[0]}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            width={320}
+            height={192}
           />
         </Link>
         {product.featured && (
@@ -97,7 +130,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       <div className="p-4">
-        <Link to={`/prodotto/${product.id}`}>
+        <Link 
+          to={`/prodotto/${product.id}`}
+          aria-label={`Vai alla pagina dettagli di ${product.name}`}
+        >
           <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
             {product.name}
           </h3>
@@ -134,8 +170,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   selectedColorIndex === index 
                     ? 'border-blue-500 scale-110' 
                     : 'border-gray-300 hover:border-gray-400'
-                } bg-gradient-to-br from-gray-200 to-gray-400`}
+                }`}
                 title={color.name}
+                aria-label={`Seleziona colore ${color.name}`}
+                style={{ backgroundColor: color.hexCode || '#ccc' }}
               />
             ))}
             {product.colors.length > 4 && (
@@ -150,6 +188,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Link
             to={`/prodotto/${product.id}`}
             className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+            aria-label={`Vedi dettagli di ${product.name}`}
           >
             <Info className="h-4 w-4" />
             <span>Dettagli</span>
@@ -158,6 +197,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <button
             onClick={handleAddToCart}
             disabled={isAdding}
+            aria-label={`Aggiungi ${product.name} al carrello`}
+            aria-busy={isAdding}
             className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2 ${
               isAdding 
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
@@ -166,12 +207,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           >
             {isAdding ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <div 
+                  className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" 
+                  aria-hidden="true"
+                />
                 <span>Aggiungendo...</span>
               </>
             ) : (
               <>
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden="true" />
                 <span>Carrello</span>
               </>
             )}
