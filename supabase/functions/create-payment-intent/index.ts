@@ -11,6 +11,9 @@
     - Database integration with RLS
     - Input validation and error handling
     - Support for multiple payment methods
+
+  3. Fixed customer note handling
+    - Properly handle empty notes as null
 */
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -87,6 +90,9 @@ Deno.serve(async (req) => {
         }
       )
     }
+
+    // Gestione corretta delle note cliente
+    const customerNote = requestData.customerNote?.trim() || null;
 
     // Get environment variables
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')
@@ -252,7 +258,8 @@ Deno.serve(async (req) => {
         selected_color: item.selected_color || null,
         selected_size: item.selected_size || null,
         size_dimensions: item.size_dimensions || null,
-        customer_note: item.customer_note || null
+        // Gestione coerente delle note vuote
+        customer_note: item.customer_note?.trim() || null
       }))
 
       const { error: orderItemsError } = await supabase
@@ -275,7 +282,8 @@ Deno.serve(async (req) => {
           selected_color: requestData.selectedColor || null,
           selected_size: requestData.selectedSize || null,
           size_dimensions: requestData.sizeDimensions || null,
-          customer_note: requestData.customerNote || null
+          // Usa la variabile già processata per le note
+          customer_note: customerNote
         })
 
       if (orderItemError) {
