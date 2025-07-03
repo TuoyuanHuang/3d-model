@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
+import { Toaster } from 'react-hot-toast';
 
 // Lazy load all pages
 const Home = React.lazy(() => import('./pages/Home'));
@@ -104,6 +105,30 @@ function App() {
                 </>
               } />
             </Routes>
+            <Toaster 
+        position="bottom-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            borderRadius: '8px',
+            background: '#333',
+            color: '#fff',
+          },
+          success: {
+            style: {
+              background: '#10B981',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+            },
+          },
+        }}
+      />
+
           </div>
         </Router>
       </CartProvider>
