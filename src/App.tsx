@@ -106,29 +106,28 @@ function App() {
               } />
             </Routes>
             <Toaster 
-                position="bottom-right"
-                toastOptions={{
-                  duration: 3000,
+              position="bottom-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  borderRadius: '8px',
+                  background: '#333',
+                  color: '#fff',
+                },
+                success: {
                   style: {
-                    borderRadius: '8px',
-                    background: '#333',
+                    background: '#10B981',
                     color: '#fff',
                   },
-                  success: {
-                    style: {
-                      background: '#10B981',
-                      color: '#fff',
-                    },
+                },
+                error: {
+                  style: {
+                    background: '#EF4444',
+                    color: '#fff',
                   },
-                  error: {
-                    style: {
-                      background: '#EF4444',
-                      color: '#fff',
-                    },
-                  },
-                }}
-              />
-
+                },
+              }}
+            />
           </div>
         </Router>
       </CartProvider>
