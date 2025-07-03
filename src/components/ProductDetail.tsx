@@ -1,4 +1,370 @@
-electedColor.images.length > 1 && (
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Mail, Phone, Star, Package, Palette, Ruler, ShoppingCart, Plus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
+import CheckoutForm from '../components/CheckoutForm';
+import LazyImage from '../components/LazyImage';
+import productsData from '../data/products.json';
+
+interface ProductColor {
+  name: string;
+  images: string[];
+}
+
+interface ProductSize {
+  name: string;
+  dimensions: string;
+  priceModifier: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  basePrice: number;
+  material: string;
+  colors: ProductColor[];
+  sizes: ProductSize[];
+  description: string;
+  features?: string[];
+  featured?: boolean;
+}
+
+const ProductDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user, session } = useAuth();
+  const { addToCart, loading: cartLoading } = useCart();
+  
+  const product = productsData.products.find(p => p.id === id) as Product | undefined;
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [isAdding, setIsAdding] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [customerNote, setCustomerNote] = useState('');
+  const [customerInfo, setCustomerInfo] = useState({
+    name: user?.user_metadata?.full_name || '',
+    email: user?.email || '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+  });
+
+  // Reset selected image when color changes
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [selectedColorIndex]);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Prodotto non trovato</h1>
+          <Link
+            to="/catalogo"
+            className="text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center space-x-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Torna al catalogo</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const category = productsData.categories.find(c => c.id === product.category);
+  const material = productsData.materials.find(m => m.id === product.material);
+  
+  // Calculate current price based on base price and size modifier
+  const currentPrice = product.basePrice + product.sizes[selectedSizeIndex].priceModifier;
+  
+  // Get current color and its images
+  const selectedColor = product.colors[selectedColorIndex];
+  const selectedSize = product.sizes[selectedSizeIndex];
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      
+      // DEBUG: Log customer note before processing
+      console.log('Customer note before processing:', customerNote);
+      const processedNote = customerNote.trim() || undefined;
+      console.log('Processed note for addToCart:', processedNote);
+      
+      await addToCart(
+        product.id, 
+        product.name, 
+        currentPrice, 
+        quantity, 
+        selectedColor.name,
+        selectedSize.name,
+        selectedSize.dimensions,
+        processedNote
+      );
+      
+      // DEBUG: Log after addToCart call
+      console.log('addToCart called successfully');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setShowCheckout(true);
+  };
+
+  const handlePaymentSuccess = (orderId: string) => {
+    navigate(`/ordini/${orderId}`);
+  };
+
+  const handlePaymentError = (error: string) => {
+    console.error('Payment error:', error);
+    setShowCheckout(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomerInfo({
+      ...customerInfo,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  if (showCheckout) {
+    // DEBUG: Log customer note in checkout view
+    console.log('Checkout view - customerNote:', customerNote);
+    const checkoutNote = customerNote || undefined;
+    console.log('Checkout note passed to CheckoutForm:', checkoutNote);
+    
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <button
+              onClick={() => setShowCheckout(false)}
+              className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Torna al prodotto</span>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+            <p className="text-gray-600 mt-2">Completa il tuo acquisto</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Product Summary */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                Riepilogo Prodotto
+              </h2>
+
+              <div className="flex space-x-4 mb-6">
+                <LazyImage
+                  src={selectedColor.images[0]}
+                  alt={product.name}
+                  className="w-20 h-20 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                  <p className="text-gray-600 text-sm">{product.description}</p>
+                  <p className="text-lg font-bold text-blue-600 mt-2">€{currentPrice.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <span className="text-sm text-gray-600">Colore: </span>
+                  <span className="font-medium">{selectedColor.name}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Dimensione: </span>
+                  <span className="font-medium">{selectedSize.name} ({selectedSize.dimensions})</span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">Quantità: </span>
+                  <span className="font-medium">{quantity}</span>
+                </div>
+                {customerNote && (
+                  <div>
+                    <span className="text-sm text-gray-600">Note cliente: </span>
+                    <span className="font-medium">{customerNote}</span>
+                  </div>
+                )}
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>Totale:</span>
+                    <span className="text-blue-600">€{(currentPrice * quantity).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Form */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Informazioni di Pagamento</h2>
+              
+              {/* Customer Info Form */}
+              <div className="mb-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome Completo *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={customerInfo.name}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Mario Rossi"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={customerInfo.email}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="mario@email.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Telefono
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={customerInfo.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="+39 123 456 7890"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                      Indirizzo
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={customerInfo.address}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Via Roma 123"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      Città
+                    </label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      value={customerInfo.city}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Milano"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                      CAP
+                    </label>
+                    <input
+                      type="text"
+                      id="postalCode"
+                      name="postalCode"
+                      value={customerInfo.postalCode}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="20121"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <CheckoutForm
+                amount={currentPrice * quantity}
+                productName={product.name}
+                productId={product.id}
+                selectedColor={selectedColor.name}
+                selectedSize={selectedSize.name}
+                sizeDimensions={selectedSize.dimensions}
+                customerNote={customerNote || undefined} // Passa undefined se vuoto
+                quantity={quantity}
+                customerInfo={customerInfo}
+                authToken={session?.access_token}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <nav className="mb-8">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link to="/" className="hover:text-blue-600">Home</Link>
+            <span>/</span>
+            <Link to="/catalogo" className="hover:text-blue-600">Catalogo</Link>
+            <span>/</span>
+            <span className="text-gray-900">{product.name}</span>
+          </div>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Image Gallery */}
+          <div className="space-y-4">
+            <div className="aspect-square bg-white rounded-lg overflow-hidden shadow-sm">
+              <LazyImage
+                src={selectedColor.images[selectedImageIndex]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {selectedColor.images.length > 1 && (
               <div className="flex space-x-2">
                 {selectedColor.images.map((image, index) => (
                   <button
@@ -166,7 +532,11 @@ electedColor.images.length > 1 && (
                 name="customerNote"
                 rows={3}
                 value={customerNote}
-                onChange={(e) => setCustomerNote(e.target.value)}
+                onChange={(e) => {
+                  setCustomerNote(e.target.value);
+                  // DEBUG: Log on every change
+                  console.log('Customer note changed:', e.target.value);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
                 placeholder="Es: 'Vorrei questo prodotto con una finitura opaca', 'Si prega di incidere le iniziali AB'"
               />
