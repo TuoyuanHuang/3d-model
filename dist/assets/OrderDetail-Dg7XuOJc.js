@@ -1,4 +1,4 @@
-import{u as v,j as e}from"./index-CZ0_HHih.js";import{r as i}from"./vendor-seEwQDT5.js";import{b as w,L as h}from"./router-BnLuTL28.js";import{E as u,r as _,b as p,x as C,o as r,h as g,d as I,e as S,f as O,B as P}from"./ui-zOJd_8GS.js";import"./supabase-BZoxqOT3.js";const L=()=>{const{orderId:l}=w(),{supabase:n}=v(),[s,j]=i.useState(null),[N,c]=i.useState(!0),[d,o]=i.useState("");i.useEffect(()=>{l&&(async()=>{try{c(!0);const{data:a,error:x}=await n.from("orders").select(`
+import{u as v,j as e}from"./index-DFTuakBc.js";import{r as i}from"./vendor-seEwQDT5.js";import{b as w,L as h}from"./router-BnLuTL28.js";import{E as u,r as _,b as p,x as C,o as r,h as g,d as I,e as S,f as O,B as P}from"./ui-zOJd_8GS.js";import"./supabase-BZoxqOT3.js";const L=()=>{const{orderId:l}=w(),{supabase:n}=v(),[s,j]=i.useState(null),[N,c]=i.useState(!0),[d,o]=i.useState("");i.useEffect(()=>{l&&(async()=>{try{c(!0);const{data:a,error:x}=await n.from("orders").select(`
             *,
             order_items (
               product_name,
