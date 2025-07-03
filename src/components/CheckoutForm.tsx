@@ -309,7 +309,16 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   }
 
   return (
-
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center space-x-2 mb-2">
+          <Lock className="h-5 w-5 text-blue-600" />
+          <span className="font-medium text-blue-800">Secure Payment</span>
+        </div>
+        <p className="text-sm text-blue-700">
+          Your data is protected with 256-bit SSL encryption
+        </p>
+      </div>
 
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900">Payment Method</h3>
@@ -387,7 +396,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         )}
       </div>
 
-      {errorMessage && 
+      {errorMessage && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
           <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
           <div>
@@ -395,7 +404,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
             <p className="text-sm text-red-700">{errorMessage}</p>
           </div>
         </div>
-      }
+      )}
 
       <button
         type="submit"
