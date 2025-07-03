@@ -309,7 +309,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   }
 
   return (
-    <
+
 
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900">Payment Method</h3>
