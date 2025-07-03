@@ -315,9 +315,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
           <Lock className="h-5 w-5 text-blue-600" />
           <span className="font-medium text-blue-800">Secure Payment</span>
         </div>
-        <p className="text-sm text-blue-700">
-          Your data is protected with 256-bit SSL encryption
-        </p>
+        
       </div>
 
       <div className="space-y-4">
