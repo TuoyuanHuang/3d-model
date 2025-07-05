@@ -70,8 +70,8 @@ const Hero: React.FC = () => {
               </Link>
             </div>
           </div>
-        </div>
-      </div>
+
+          
 
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
