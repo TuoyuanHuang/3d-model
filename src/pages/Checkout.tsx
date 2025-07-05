@@ -22,20 +22,8 @@ const Spinner: React.FC = () => (
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  
-  // Get auth context with session information
-  const { 
-    user, 
-    session, 
-    loading: authLoading 
-  } = useAuth();
-  
-  // Get cart context
-  const { 
-    items: cartItems, 
-    clearCart, 
-    loading: isCartLoading 
-  } = useCart();
+  const { user, session, loading: authLoading } = useAuth();
+  const { items: cartItems, clearCart, loading: isCartLoading } = useCart();
   
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
@@ -47,43 +35,47 @@ const Checkout: React.FC = () => {
   });
   
   const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const deliveryFees = {
     standard: 5.00,
     express: 12.00
   };
 
-  // Show spinner while auth, cart, or session is loading
-  if (authLoading || isCartLoading) {
-    return <Spinner />;
-  }
-
-  // Redirect to login if user is not authenticated
-  if (!user && !session) {
-    navigate('/login');
-    return null;
-  }
-
-  // Redirect if cart is empty
-  if (!cartItems || cartItems.length === 0) {
-    navigate('/cart');
-    return null;
-  }
-
   // Calculate prices safely
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  const subtotal = cartItems?.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) || 0;
   const deliveryFee = deliveryFees[deliveryMethod];
   const total = subtotal + deliveryFee;
 
+  // Get access token from session
+  const authToken = session?.access_token;
+
+  // Handle redirects in useEffect to avoid conditional returns
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (authLoading || isCartLoading) return;
+
+    if (!user && !session) {
+      navigate('/login');
+      setIsRedirecting(true);
+      return;
+    }
+
+    if (!cartItems || cartItems.length === 0) {
+      navigate('/cart');
+      setIsRedirecting(true);
+    }
+  }, [authLoading, isCartLoading, user, session, cartItems, navigate]);
+
+  // Handle cart becoming empty during session
+  useEffect(() => {
+    if (cartItems?.length === 0) {
       navigate('/cart');
     }
   }, [cartItems, navigate]);
 
   const handleSuccess = (orderId: string) => {
     clearCart();
-    navigate(`/orders`);
+    navigate(`/orders/${orderId}`);
   };
 
   const handleError = (error: string) => {
@@ -103,8 +95,15 @@ const Checkout: React.FC = () => {
                      customerInfo.city && 
                      customerInfo.postalCode;
 
-  // Get access token from session
-  const authToken = session?.access_token;
+  // Show spinner while loading or redirecting
+  if (authLoading || isCartLoading || isRedirecting) {
+    return <Spinner />;
+  }
+
+  // Show nothing while redirects are happening
+  if (!user || !session || !cartItems || cartItems.length === 0) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
