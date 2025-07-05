@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useCart } from '../contexts/CartContext';
+import { useCart } from '../contexts/CartContext'; // Updated to match your context
 import CheckoutForm from '../components/CheckoutForm';
 import { Truck, Clock } from 'lucide-react';
 
@@ -14,7 +14,7 @@ interface CustomerInfo {
   postalCode?: string;
 }
 
-// Simple spinner component - create this if you don't have one
+// Simple spinner component
 const Spinner: React.FC = () => (
   <div className="flex justify-center items-center min-h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -24,7 +24,14 @@ const Spinner: React.FC = () => (
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { cartItems, clearCart, isLoading: isCartLoading } = useCart();
+  
+  // Updated to match your CartContext properties
+  const { 
+    items: cartItems, 
+    clearCart, 
+    loading: isCartLoading 
+  } = useCart();
+  
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: user?.email || '',
@@ -41,17 +48,17 @@ const Checkout: React.FC = () => {
   };
 
   // Show spinner while cart is loading
-  if (isCartLoading || cartItems === undefined) {
+  if (isCartLoading) {
     return <Spinner />;
   }
 
   // Redirect if cart is empty
-  if (cartItems.length === 0) {
+  if (!cartItems || cartItems.length === 0) {
     navigate('/cart');
     return null;
   }
 
-  // Calculate prices safely since cartItems is defined and has items
+  // Calculate prices safely
   const subtotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
   const deliveryFee = deliveryFees[deliveryMethod];
   const total = subtotal + deliveryFee;
