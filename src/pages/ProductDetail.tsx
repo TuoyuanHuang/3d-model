@@ -299,20 +299,18 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              <CheckoutForm
-                amount={currentPrice * quantity}
-                productName={product.name}
-                productId={product.id}
-                selectedColor={selectedColor.name}
-                selectedSize={selectedSize.name}
-                sizeDimensions={selectedSize.dimensions}
-                customerNote={customerNote}
-                quantity={quantity}
-                customerInfo={customerInfo}
-                authToken={session?.access_token}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+              <<CheckoutForm
+  amount={finalTotal}
+  productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
+  productId="cart-order"
+  cartItems={items}
+  customerInfo={customerInfo}
+  deliveryMethod={deliveryMethod}
+  deliveryFee={deliveryFee}
+  authToken={session?.access_token}
+  onSuccess={handlePaymentSuccess}
+  onError={handlePaymentError}
+/>
             </div>
           </div>
         </div>
