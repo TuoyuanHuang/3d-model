@@ -3,7 +3,14 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
 import { CreditCard, Lock, CheckCircle, AlertCircle, Smartphone, Loader2 } from 'lucide-react';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Initialize Stripe outside the component
+let stripePromise: any;
+const getStripe = () => {
+  if (!stripePromise && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+    stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  }
+  return stripePromise;
+};
 
 interface CartItem {
   id: string;
@@ -70,10 +77,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const [canMakePayment, setCanMakePayment] = useState(false);
   const [paymentMethodAvailable, setPaymentMethodAvailable] = useState<'card' | 'paymentRequest'>('card');
   
-  // Track client secret separately for each payment attempt
   const clientSecretRef = useRef<string>('');
-  
-  // Track if payment request is being processed
   const isProcessingPaymentRequest = useRef(false);
 
   // Initialize Payment Request (for Google Pay / Apple Pay)
@@ -107,7 +111,6 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         setErrorMessage('');
         isProcessingPaymentRequest.current = true;
 
-        // Create payment intent
         const response = await createPaymentIntent();
         const { clientSecret } = response;
         clientSecretRef.current = clientSecret;
@@ -151,7 +154,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         isProcessingPaymentRequest.current = false;
       }
     });
-  }, [stripe, amount, productName]);
+  }, [stripe, amount, productName, customerInfo]);
 
   const createPaymentIntent = async () => {
     validateCustomerInfo();
@@ -229,13 +232,13 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     e.preventDefault();
     
     if (!stripe || !elements) {
-      setErrorMessage('Stripe is not loaded yet. Please try again in a few seconds.');
+      setErrorMessage('Stripe non è ancora caricato. Riprova tra qualche secondo.');
       return;
     }
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
-      setErrorMessage('Card element not found');
+      setErrorMessage('Elemento carta non trovato');
       return;
     }
 
@@ -244,7 +247,6 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     setErrorMessage('');
 
     try {
-      // Create payment intent
       const response = await createPaymentIntent();
       const { clientSecret } = response;
       clientSecretRef.current = clientSecret;
@@ -271,13 +273,13 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       );
 
       if (stripeError) {
-        throw new Error(stripeError.message || 'Payment error');
+        throw new Error(stripeError.message || 'Errore nel pagamento');
       }
 
       if (paymentIntent?.status === 'succeeded') {
         handlePaymentSuccess(paymentIntent.id);
       } else {
-        throw new Error('Payment not completed');
+        throw new Error('Pagamento non completato');
       }
     } catch (error) {
       handlePaymentError(error);
@@ -420,10 +422,47 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   );
 };
 
-// Main CheckoutForm component that wraps with Elements provider
+// Main CheckoutForm component that handles Stripe loading
 const CheckoutForm: React.FC<CheckoutFormProps> = (props) => {
+  const [stripeReady, setStripeReady] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const initializeStripe = async () => {
+      try {
+        const stripe = await getStripe();
+        if (isMounted && stripe) {
+          setStripeReady(true);
+        }
+      } catch (error) {
+        console.error('Failed to load Stripe', error);
+        if (isMounted && props.onError) {
+          props.onError('Failed to load payment system');
+        }
+      }
+    };
+
+    if (!getStripe()) {
+      initializeStripe();
+    } else {
+      setStripeReady(true);
+    }
+
+    return () => { isMounted = false; };
+  }, []);
+
+  if (!stripeReady) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg">
+        <Loader2 className="h-12 w-12 text-blue-500 animate-spin mb-4" />
+        <p className="text-gray-600">Caricamento del sistema di pagamento...</p>
+      </div>
+    );
+  }
+
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={getStripe()}>
       <PaymentForm {...props} />
     </Elements>
   );
