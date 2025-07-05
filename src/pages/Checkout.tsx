@@ -14,14 +14,17 @@ interface CustomerInfo {
   postalCode?: string;
 }
 
+// Simple spinner component - create this if you don't have one
+const Spinner: React.FC = () => (
+  <div className="flex justify-center items-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { cartItems, clearCart } = useCart();
-  
-  // Debug: Log cartItems immediately after getting them from context
-  console.log('Checkout - cartItems from useCart:', cartItems);
-  
+  const { cartItems, clearCart, isLoading: isCartLoading } = useCart();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: user?.email || '',
@@ -31,29 +34,31 @@ const Checkout: React.FC = () => {
     postalCode: ''
   });
   const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Debug: Log component state
-  console.log('Checkout - component state:', {
-    cartItems,
-    customerInfo,
-    deliveryMethod,
-    isLoading
-  });
 
   const deliveryFees = {
     standard: 5.00,
     express: 12.00
   };
 
-  const subtotal = cartItems?.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) || 0;
+  // Show spinner while cart is loading
+  if (isCartLoading || cartItems === undefined) {
+    return <Spinner />;
+  }
+
+  // Redirect if cart is empty
+  if (cartItems.length === 0) {
+    navigate('/cart');
+    return null;
+  }
+
+  // Calculate prices safely since cartItems is defined and has items
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
   const deliveryFee = deliveryFees[deliveryMethod];
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
-    console.log('Checkout useEffect - cartItems:', cartItems);
-    if (!cartItems?.length) {
-      console.log('Redirecting to /cart because cart is empty');
+    // Additional safeguard in case cart becomes empty during session
+    if (cartItems.length === 0) {
       navigate('/cart');
     }
   }, [cartItems, navigate]);
@@ -74,15 +79,9 @@ const Checkout: React.FC = () => {
     }));
   };
 
-  const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && customerInfo.city && customerInfo.postalCode;
+  const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && 
+                      customerInfo.city && customerInfo.postalCode;
 
-  if (!cartItems?.length) {
-    console.log('Returning null because cart is empty');
-    return null; // Will redirect to cart
-  }
-
-  console.log('Rendering checkout page');
-  
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
