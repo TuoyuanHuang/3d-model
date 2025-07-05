@@ -42,6 +42,7 @@ interface CheckoutFormProps {
   onError?: (error: string) => void;
 }
 
+// PaymentForm component that uses Stripe hooks
 const PaymentForm: React.FC<CheckoutFormProps> = ({ 
   amount, 
   productName, 
@@ -419,6 +420,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   );
 };
 
+// Main CheckoutForm component that wraps with Elements provider
 const CheckoutForm: React.FC<CheckoutFormProps> = (props) => {
   return (
     <Elements stripe={stripePromise}>
