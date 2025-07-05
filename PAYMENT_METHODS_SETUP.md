@@ -107,7 +107,7 @@ ADMIN_MASTER_KEY=your-secret-master-key-2024
 5555 5555 5555 4444  # Mastercard
 
 # Failed payments
-4000 0000 0000 0002  # Card declined
+4000 00000 0000 0002  # Card declined
 4000 0000 0000 9995  # Insufficient funds
 
 # 3D Secure authentication
