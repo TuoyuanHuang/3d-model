@@ -83,7 +83,7 @@ const Checkout: React.FC = () => {
 
   const handleSuccess = (orderId: string) => {
     clearCart();
-    navigate(`/orders/${orderId}`);
+    navigate(`/orders`);
   };
 
   const handleError = (error: string) => {
