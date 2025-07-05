@@ -83,10 +83,7 @@ const Hero: React.FC = () => {
               <h3 className="font-semibold text-lg">500+</h3>
               <p className="text-sm text-gray-600">Progetti completati</p>
             </div>
-            <div className="absolute -top-6 -right-6 bg-white text-gray-900 p-4 rounded-xl shadow-lg">
-              <h3 className="font-semibold text-lg">24h</h3>
-              <p className="text-sm text-gray-600">Tempo medio</p>
-            </div>
+            
           </div>
         </div>
       </div>
