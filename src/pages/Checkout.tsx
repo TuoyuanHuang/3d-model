@@ -46,6 +46,9 @@ const Checkout: React.FC = () => {
   const subtotal = cartItems?.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) || 0;
   const deliveryFee = deliveryFees[deliveryMethod];
   const total = subtotal + deliveryFee;
+  
+  // Convert to cents for Stripe (critical fix)
+  const totalInCents = Math.round(total * 100);
 
   // Get access token from session
   const authToken = session?.access_token;
@@ -287,7 +290,7 @@ const Checkout: React.FC = () => {
               {isFormValid ? (
                 authToken ? (
                   <CheckoutForm
-                    amount={total}
+                    amount={totalInCents}  {/* Pass amount in cents */}
                     productName={cartItems.map(item => item.product_name).join(', ')}
                     productId={cartItems[0]?.product_id || ''}
                     cartItems={cartItems}
