@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useCart } from '../contexts/CartContext'; // Updated to match your context
+import { useCart } from '../contexts/CartContext';
 import CheckoutForm from '../components/CheckoutForm';
 import { Truck, Clock } from 'lucide-react';
 
@@ -14,7 +14,6 @@ interface CustomerInfo {
   postalCode?: string;
 }
 
-// Simple spinner component
 const Spinner: React.FC = () => (
   <div className="flex justify-center items-center min-h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -23,9 +22,15 @@ const Spinner: React.FC = () => (
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
-  // Updated to match your CartContext properties
+  // Get auth context with session information
+  const { 
+    user, 
+    session, 
+    loading: authLoading 
+  } = useAuth();
+  
+  // Get cart context
   const { 
     items: cartItems, 
     clearCart, 
@@ -34,12 +39,13 @@ const Checkout: React.FC = () => {
   
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
-    email: user?.email || '',
+    email: user?.email || session?.user?.email || '',
     phone: '',
     address: '',
     city: '',
     postalCode: ''
   });
+  
   const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
 
   const deliveryFees = {
@@ -47,9 +53,15 @@ const Checkout: React.FC = () => {
     express: 12.00
   };
 
-  // Show spinner while cart is loading
-  if (isCartLoading) {
+  // Show spinner while auth, cart, or session is loading
+  if (authLoading || isCartLoading) {
     return <Spinner />;
+  }
+
+  // Redirect to login if user is not authenticated
+  if (!user && !session) {
+    navigate('/login');
+    return null;
   }
 
   // Redirect if cart is empty
@@ -64,7 +76,6 @@ const Checkout: React.FC = () => {
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
-    // Additional safeguard in case cart becomes empty during session
     if (cartItems.length === 0) {
       navigate('/cart');
     }
@@ -86,8 +97,14 @@ const Checkout: React.FC = () => {
     }));
   };
 
-  const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && 
-                      customerInfo.city && customerInfo.postalCode;
+  const isFormValid = customerInfo.name && 
+                     customerInfo.email && 
+                     customerInfo.address && 
+                     customerInfo.city && 
+                     customerInfo.postalCode;
+
+  // Get access token from session
+  const authToken = session?.access_token;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -269,18 +286,30 @@ const Checkout: React.FC = () => {
               <h2 className="text-xl font-semibold mb-4">Pagamento</h2>
               
               {isFormValid ? (
-                <CheckoutForm
-                  amount={total}
-                  productName={cartItems.map(item => item.product_name).join(', ')}
-                  productId={cartItems[0]?.product_id || ''}
-                  cartItems={cartItems}
-                  customerInfo={customerInfo}
-                  deliveryMethod={deliveryMethod}
-                  deliveryFee={deliveryFee}
-                  authToken={user?.access_token}
-                  onSuccess={handleSuccess}
-                  onError={handleError}
-                />
+                authToken ? (
+                  <CheckoutForm
+                    amount={total}
+                    productName={cartItems.map(item => item.product_name).join(', ')}
+                    productId={cartItems[0]?.product_id || ''}
+                    cartItems={cartItems}
+                    customerInfo={customerInfo}
+                    deliveryMethod={deliveryMethod}
+                    deliveryFee={deliveryFee}
+                    authToken={authToken}
+                    onSuccess={handleSuccess}
+                    onError={handleError}
+                  />
+                ) : (
+                  <div className="text-center py-8 text-red-500">
+                    <p>Token di autenticazione mancante. Effettua il login per procedere.</p>
+                    <button 
+                      onClick={() => navigate('/login')}
+                      className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Accedi
+                    </button>
+                  </div>
+                )
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <p>Completa le informazioni di consegna per procedere con il pagamento</p>
