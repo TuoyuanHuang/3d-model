@@ -89,9 +89,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setLoading(true);
-      // Convert empty customer note to null for consistent data handling
-      const normalizedCustomerNote = customerNote && customerNote.trim() ? customerNote.trim() : null;
-      
       const { data, error } = await supabase.rpc('add_to_cart', {
         p_product_id: productId,
         p_product_name: productName,
@@ -100,7 +97,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         p_selected_color: selectedColor,
         p_selected_size: selectedSize,
         p_size_dimensions: sizeDimensions,
-        p_customer_note: normalizedCustomerNote
+        p_customer_note: customerNote
       });
 
       if (error) throw error;
@@ -116,13 +113,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateQuantity = async (itemId: string, quantity: number, customerNote?: string) => {
     try {
       setLoading(true);
-      // Convert empty customer note to null for consistent data handling
-      const normalizedCustomerNote = customerNote && customerNote.trim() ? customerNote.trim() : null;
-      
       const { data, error } = await supabase.rpc('update_cart_item_quantity', {
         p_cart_item_id: itemId,
         p_quantity: quantity,
-        p_customer_note: normalizedCustomerNote
+        p_customer_note: customerNote
       });
 
       if (error) throw error;
