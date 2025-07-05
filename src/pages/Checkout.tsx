@@ -18,6 +18,10 @@ const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { cartItems, clearCart } = useCart();
+  
+  // Debug: Log cartItems immediately after getting them from context
+  console.log('Checkout - cartItems from useCart:', cartItems);
+  
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: user?.email || '',
@@ -29,6 +33,14 @@ const Checkout: React.FC = () => {
   const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Debug: Log component state
+  console.log('Checkout - component state:', {
+    cartItems,
+    customerInfo,
+    deliveryMethod,
+    isLoading
+  });
+
   const deliveryFees = {
     standard: 5.00,
     express: 12.00
@@ -39,7 +51,9 @@ const Checkout: React.FC = () => {
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
+    console.log('Checkout useEffect - cartItems:', cartItems);
     if (!cartItems?.length) {
+      console.log('Redirecting to /cart because cart is empty');
       navigate('/cart');
     }
   }, [cartItems, navigate]);
@@ -51,7 +65,6 @@ const Checkout: React.FC = () => {
 
   const handleError = (error: string) => {
     console.error('Checkout error:', error);
-    // Error is already displayed by the CheckoutForm component
   };
 
   const handleInputChange = (field: keyof CustomerInfo, value: string) => {
@@ -64,9 +77,12 @@ const Checkout: React.FC = () => {
   const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && customerInfo.city && customerInfo.postalCode;
 
   if (!cartItems?.length) {
+    console.log('Returning null because cart is empty');
     return null; // Will redirect to cart
   }
 
+  console.log('Rendering checkout page');
+  
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
