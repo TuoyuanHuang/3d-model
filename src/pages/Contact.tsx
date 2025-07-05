@@ -116,7 +116,6 @@ const Contact: React.FC = () => {
         </div>
       </section>
 
-      
     </div>
   );
 };
