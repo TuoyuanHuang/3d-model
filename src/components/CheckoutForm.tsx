@@ -14,6 +14,7 @@ interface CartItem {
   selected_color?: string;
   selected_size?: string;
   size_dimensions?: string;
+  customer_note?: string;
 }
 
 interface CheckoutFormProps {
@@ -66,11 +67,10 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const [orderId, setOrderId] = useState<string>('');
   const [paymentRequest, setPaymentRequest] = useState<any>(null);
   const [canMakePayment, setCanMakePayment] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string>('');
   const [paymentMethodAvailable, setPaymentMethodAvailable] = useState<'card' | 'paymentRequest'>('card');
   
-  // Track if payment intent has been created
-  const paymentIntentCreated = useRef(false);
+  // Track client secret separately for each payment attempt
+  const clientSecretRef = useRef<string>('');
   
   // Track if payment request is being processed
   const isProcessingPaymentRequest = useRef(false);
@@ -106,11 +106,10 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         setErrorMessage('');
         isProcessingPaymentRequest.current = true;
 
-        // Create payment intent if not already created
-        if (!clientSecret) {
-          const response = await createPaymentIntent();
-          setClientSecret(response.clientSecret);
-        }
+        // Create payment intent
+        const response = await createPaymentIntent();
+        const { clientSecret } = response;
+        clientSecretRef.current = clientSecret;
 
         const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
           clientSecret,
@@ -186,10 +185,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       throw new Error(parseErrorResponse(errorText));
     }
 
-    const result = await response.json();
-    setClientSecret(result.clientSecret);
-    paymentIntentCreated.current = true;
-    return result;
+    return await response.json();
   };
 
   const validateCustomerInfo = () => {
@@ -247,29 +243,31 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
     setErrorMessage('');
 
     try {
-      // Create payment intent if not already created
-      if (!clientSecret && !paymentIntentCreated.current) {
-        const response = await createPaymentIntent();
-        setClientSecret(response.clientSecret);
-      }
+      // Create payment intent
+      const response = await createPaymentIntent();
+      const { clientSecret } = response;
+      clientSecretRef.current = clientSecret;
 
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: customerInfo.name,
-            email: customerInfo.email,
-            phone: customerInfo.phone,
-            address: customerInfo.address && customerInfo.city && customerInfo.postalCode ? {
-              line1: customerInfo.address,
-              city: customerInfo.city,
-              postal_code: customerInfo.postalCode,
-              country: 'IT',
-            } : undefined,
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+        clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: customerInfo.name,
+              email: customerInfo.email,
+              phone: customerInfo.phone,
+              address: customerInfo.address && customerInfo.city && customerInfo.postalCode ? {
+                line1: customerInfo.address,
+                city: customerInfo.city,
+                postal_code: customerInfo.postalCode,
+                country: 'IT',
+              } : undefined,
+            },
           },
-        },
-        receipt_email: customerInfo.email,
-      });
+          receipt_email: customerInfo.email,
+        }
+      );
 
       if (stripeError) {
         throw new Error(stripeError.message || 'Payment error');
@@ -292,17 +290,17 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
       <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
         <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-green-800 mb-2">
-          Payment Completed!
+          Pagamento Completato!
         </h3>
         <p className="text-green-700 mb-4">
-          Your order "{productName}" has been processed successfully.
+          Il tuo ordine "{productName}" è stato processato con successo.
         </p>
         <div className="bg-white rounded-lg p-4 mb-4">
-          <p className="text-sm text-gray-600 mb-1">Order Number:</p>
+          <p className="text-sm text-gray-600 mb-1">Numero Ordine:</p>
           <p className="font-mono text-lg font-semibold text-gray-900">#{orderId.slice(0, 8)}</p>
         </div>
         <p className="text-sm text-green-600">
-          You'll receive a confirmation email shortly.
+          Riceverai un'email di conferma a breve.
         </p>
       </div>
     );
@@ -310,16 +308,14 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      
-
       <div className="space-y-4">
-        <h3 className="font-semibold text-gray-900">Payment Method</h3>
+        <h3 className="font-semibold text-gray-900">Metodo di Pagamento</h3>
         
         {canMakePayment && paymentRequest && paymentMethodAvailable === 'paymentRequest' && (
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-4">
               <Smartphone className="h-5 w-5 text-gray-600" />
-              <span className="font-medium text-gray-900">Quick Payment</span>
+              <span className="font-medium text-gray-900">Pagamento Rapido</span>
             </div>
             <PaymentRequestButtonElement 
               options={{ 
@@ -339,7 +335,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
                 onClick={() => setPaymentMethodAvailable('card')}
                 className="text-sm text-blue-600 hover:text-blue-800"
               >
-                Use credit/debit card instead
+                Usa carta di credito/debito
               </button>
             </div>
           </div>
@@ -349,7 +345,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
           <div className="bg-white border border-gray-300 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-4">
               <CreditCard className="h-5 w-5 text-gray-600" />
-              <span className="font-medium text-gray-900">Credit/Debit Card</span>
+              <span className="font-medium text-gray-900">Carta di Credito/Debito</span>
             </div>
             <div className="p-4 border border-gray-200 rounded-lg bg-white">
               <CardElement
@@ -380,7 +376,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
                   onClick={() => setPaymentMethodAvailable('paymentRequest')}
                   className="text-sm text-blue-600 hover:text-blue-800"
                 >
-                  Use Apple Pay/Google Pay instead
+                  Usa Apple Pay/Google Pay
                 </button>
               </div>
             )}
@@ -392,7 +388,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
           <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
           <div>
-            <h4 className="font-medium text-red-800">Payment Error</h4>
+            <h4 className="font-medium text-red-800">Errore di Pagamento</h4>
             <p className="text-sm text-red-700">{errorMessage}</p>
           </div>
         </div>
@@ -406,18 +402,18 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         {isLoading ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Processing...</span>
+            <span>Elaborazione pagamento...</span>
           </>
         ) : (
           <>
             <Lock className="h-5 w-5" />
-            <span>Pay €{amount.toFixed(2)}</span>
+            <span>Paga €{amount.toFixed(2)}</span>
           </>
         )}
       </button>
 
       <p className="text-xs text-gray-500 text-center">
-        By clicking "Pay" you agree to our terms of service and privacy policy
+        Cliccando "Paga" accetti i nostri <a href="/terms" className="text-blue-600 hover:underline">Termini di Servizio</a> e la <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>
       </p>
     </form>
   );
