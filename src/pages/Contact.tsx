@@ -116,32 +116,7 @@ const Contact: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-            Pronto per Iniziare?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Contattaci oggi stesso per una consulenza gratuita e scopri come possiamo 
-            aiutarti a realizzare i tuoi progetti.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a
-              href="tel:+391234567890"
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200"
-            >
-              Chiama Ora
-            </a>
-            <a
-              href="mailto:info@print3dpro.it"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors duration-200"
-            >
-              Invia Email
-            </a>
-          </div>
-        </div>
-      </section>
+      
     </div>
   );
 };
