@@ -72,13 +72,7 @@ const Hero: React.FC = () => {
           </div>
 
           <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-blue-400 to-blue-600 rounded-3xl p-8 transform rotate-3 hover:rotate-6 transition-transform duration-300">
-              <img
-                src="https://cdn.discordapp.com/attachments/1286814116232560700/1380898930954342492/6-lions-for-3d-print-3d-model-max-obj-fbx-c4d-ma-stl.png?ex=68458dd9&is=68443c59&hm=e9640ae1ef65601882793783af6391b52998c319f2e9c19ce7ea7c86a1e98470&"
-                alt="Stampa 3D professionale"
-                className="w-full h-full object-cover rounded-2xl shadow-xl"
-              />
-            </div>
+           
             
             
           </div>
