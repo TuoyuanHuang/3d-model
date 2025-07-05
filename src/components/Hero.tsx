@@ -70,8 +70,6 @@ const Hero: React.FC = () => {
               </Link>
             </div>
           </div>
-
-          
         </div>
       </div>
 
