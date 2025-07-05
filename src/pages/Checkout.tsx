@@ -34,12 +34,12 @@ const Checkout: React.FC = () => {
     express: 12.00
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  const subtotal = cartItems?.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) || 0;
   const deliveryFee = deliveryFees[deliveryMethod];
   const total = subtotal + deliveryFee;
 
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (!cartItems?.length) {
       navigate('/cart');
     }
   }, [cartItems, navigate]);
@@ -63,7 +63,7 @@ const Checkout: React.FC = () => {
 
   const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && customerInfo.city && customerInfo.postalCode;
 
-  if (cartItems.length === 0) {
+  if (!cartItems?.length) {
     return null; // Will redirect to cart
   }
 
