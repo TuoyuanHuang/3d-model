@@ -79,10 +79,7 @@ const Hero: React.FC = () => {
                 className="w-full h-full object-cover rounded-2xl shadow-xl"
               />
             </div>
-            <div className="absolute -bottom-6 -left-6 bg-white text-gray-900 p-4 rounded-xl shadow-lg">
-              <h3 className="font-semibold text-lg">500+</h3>
-              <p className="text-sm text-gray-600">Progetti completati</p>
-            </div>
+            
             
           </div>
         </div>
