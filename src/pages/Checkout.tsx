@@ -1,18 +1,9 @@
-import React, { useState } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Loader, CheckCircle, AlertCircle } from 'lucide-react';
-
-interface CartItem {
-  id: string;
-  product_id: string;
-  product_name: string;
-  unit_price: number;
-  quantity: number;
-  selected_color?: string;
-  selected_size?: string;
-  size_dimensions?: string;
-  customer_note?: string;
-}
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
+import CheckoutForm from '../components/CheckoutForm';
+import { Truck, Clock } from 'lucide-react';
 
 interface CustomerInfo {
   name: string;
@@ -23,182 +14,262 @@ interface CustomerInfo {
   postalCode?: string;
 }
 
-interface CheckoutFormProps {
-  amount: number;
-  productName: string;
-  productId: string;
-  cartItems?: CartItem[];
-  customerInfo: CustomerInfo;
-  deliveryMethod: 'standard' | 'express';
-  deliveryFee: number;
-  authToken?: string;
-  onSuccess: (orderId: string) => void;
-  onError: (error: string) => void;
-}
+const Checkout: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { cartItems, clearCart } = useCart();
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
+    name: '',
+    email: user?.email || '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: ''
+  });
+  const [deliveryMethod, setDeliveryMethod] = useState<'standard' | 'express'>('standard');
+  const [isLoading, setIsLoading] = useState(false);
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({
-  amount,
-  productName,
-  productId,
-  cartItems,
-  customerInfo,
-  deliveryMethod,
-  deliveryFee,
-  authToken,
-  onSuccess,
-  onError
-}) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!stripe || !elements) {
-      // Stripe.js has not loaded yet
-      return;
-    }
-
-    setIsProcessing(true);
-    setErrorMessage(null);
-
-    try {
-      // 1. Create a payment intent by calling our edge function
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: 'eur',
-          productName: productName,
-          productId: productId,
-          cartItems: cartItems,
-          customerInfo: customerInfo,
-          deliveryMethod: deliveryMethod,
-          deliveryFee: deliveryFee,
-          customerNote: '' // You can adjust this if needed
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create payment intent');
-      }
-
-      const { clientSecret, paymentIntentId, orderId } = await response.json();
-
-      // Validate client secret
-      if (!clientSecret || !clientSecret.includes('_secret_')) {
-        throw new Error('Invalid payment token from server');
-      }
-
-      // 2. Confirm the payment with Stripe
-      const cardElement = elements.getElement(CardElement);
-
-      if (!cardElement) {
-        throw new Error('Card element not found');
-      }
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: {
-            name: customerInfo.name,
-            email: customerInfo.email,
-            phone: customerInfo.phone,
-            address: {
-              line1: customerInfo.address,
-              city: customerInfo.city,
-              postal_code: customerInfo.postalCode,
-              country: 'IT'
-            }
-          }
-        }
-      });
-
-      if (result.error) {
-        // Show error to your customer
-        throw new Error(result.error.message || 'Payment failed');
-      } else {
-        // Payment succeeded
-        setIsSuccess(true);
-        onSuccess(orderId); // Notify parent component (Checkout page) of success
-      }
-    } catch (error: any) {
-      console.error('Payment error:', error);
-      setErrorMessage(error.message || 'An error occurred during payment');
-      onError(error.message || 'An error occurred during payment');
-    } finally {
-      setIsProcessing(false);
-    }
+  const deliveryFees = {
+    standard: 5.00,
+    express: 12.00
   };
 
-  if (isSuccess) {
-    return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-green-800 mb-2">Pagamento Riuscito!</h3>
-        <p className="text-green-700">
-          Il tuo ordine è stato confermato. Riceverai una email di conferma a breve.
-        </p>
-      </div>
-    );
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+  const deliveryFee = deliveryFees[deliveryMethod];
+  const total = subtotal + deliveryFee;
+
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      navigate('/cart');
+    }
+  }, [cartItems, navigate]);
+
+  const handleSuccess = (orderId: string) => {
+    clearCart();
+    navigate(`/orders/${orderId}`);
+  };
+
+  const handleError = (error: string) => {
+    console.error('Checkout error:', error);
+    // Error is already displayed by the CheckoutForm component
+  };
+
+  const handleInputChange = (field: keyof CustomerInfo, value: string) => {
+    setCustomerInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const isFormValid = customerInfo.name && customerInfo.email && customerInfo.address && customerInfo.city && customerInfo.postalCode;
+
+  if (cartItems.length === 0) {
+    return null; // Will redirect to cart
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="border border-gray-300 rounded-lg p-4">
-        <CardElement 
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#424770',
-                '::placeholder': {
-                  color: '#aab7c4',
-                },
-              },
-              invalid: {
-                color: '#9e2146',
-              },
-            },
-          }}
-        />
-      </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Order Summary */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Riepilogo Ordine</h2>
+            
+            <div className="space-y-4 mb-6">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between items-center py-2 border-b">
+                  <div className="flex-1">
+                    <h3 className="font-medium">{item.product_name}</h3>
+                    {item.selected_color && (
+                      <p className="text-sm text-gray-600">Colore: {item.selected_color}</p>
+                    )}
+                    {item.selected_size && (
+                      <p className="text-sm text-gray-600">Dimensione: {item.selected_size}</p>
+                    )}
+                    <p className="text-sm text-gray-600">Quantità: {item.quantity}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">€{(item.unit_price * item.quantity).toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-      {errorMessage && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 flex items-center">
-          <AlertCircle className="h-5 w-5 mr-2" />
-          {errorMessage}
-        </div>
-      )}
+            {/* Delivery Method Selection */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3">Metodo di Consegna</h3>
+              <div className="space-y-3">
+                <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value="standard"
+                    checked={deliveryMethod === 'standard'}
+                    onChange={(e) => setDeliveryMethod(e.target.value as 'standard')}
+                    className="mr-3"
+                  />
+                  <Truck className="h-5 w-5 mr-2 text-gray-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">Consegna Standard</div>
+                    <div className="text-sm text-gray-600">5-7 giorni lavorativi</div>
+                  </div>
+                  <div className="font-medium">€{deliveryFees.standard.toFixed(2)}</div>
+                </label>
+                
+                <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="delivery"
+                    value="express"
+                    checked={deliveryMethod === 'express'}
+                    onChange={(e) => setDeliveryMethod(e.target.value as 'express')}
+                    className="mr-3"
+                  />
+                  <Clock className="h-5 w-5 mr-2 text-gray-600" />
+                  <div className="flex-1">
+                    <div className="font-medium">Consegna Express</div>
+                    <div className="text-sm text-gray-600">2-3 giorni lavorativi</div>
+                  </div>
+                  <div className="font-medium">€{deliveryFees.express.toFixed(2)}</div>
+                </label>
+              </div>
+            </div>
 
-      <button
-        type="submit"
-        disabled={!stripe || isProcessing}
-        className={`w-full py-3 px-4 rounded-lg font-medium text-white ${
-          !stripe || isProcessing 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {isProcessing ? (
-          <div className="flex items-center justify-center">
-            <Loader className="animate-spin h-5 w-5 mr-2" />
-            Elaborazione pagamento...
+            {/* Order Total */}
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotale:</span>
+                <span>€{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Spedizione:</span>
+                <span>€{deliveryFee.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg border-t pt-2">
+                <span>Totale:</span>
+                <span>€{total.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
-        ) : (
-          `Paga €${amount.toFixed(2)}`
-        )}
-      </button>
-    </form>
+
+          {/* Customer Information & Payment */}
+          <div className="space-y-6">
+            {/* Customer Information */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Informazioni di Consegna</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={customerInfo.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={customerInfo.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Telefono
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerInfo.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Indirizzo *
+                  </label>
+                  <input
+                    type="text"
+                    value={customerInfo.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Città *
+                    </label>
+                    <input
+                      type="text"
+                      value={customerInfo.city}
+                      onChange={(e) => handleInputChange('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CAP *
+                    </label>
+                    <input
+                      type="text"
+                      value={customerInfo.postalCode}
+                      onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Pagamento</h2>
+              
+              {isFormValid ? (
+                <CheckoutForm
+                  amount={total}
+                  productName={cartItems.map(item => item.product_name).join(', ')}
+                  productId={cartItems[0]?.product_id || ''}
+                  cartItems={cartItems}
+                  customerInfo={customerInfo}
+                  deliveryMethod={deliveryMethod}
+                  deliveryFee={deliveryFee}
+                  authToken={user?.access_token}
+                  onSuccess={handleSuccess}
+                  onError={handleError}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Completa le informazioni di consegna per procedere con il pagamento</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default CheckoutForm;
+export default Checkout;
