@@ -1,8 +1,9 @@
+// Updated Checkout page
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck, AlertCircle } from 'lucide-react';
+import { CreditCard, Lock, Package, User, MapPin, CheckCircle, Truck, AlertCircle, Loader2 } from 'lucide-react';
 import CheckoutForm from '../components/CheckoutForm';
 
 // Delivery options constants
@@ -20,6 +21,11 @@ const Checkout: React.FC = () => {
   
   // Terms acceptance state
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Success state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<string>('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const [customerInfo, setCustomerInfo] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -40,16 +46,13 @@ const Checkout: React.FC = () => {
 
   // Calculate final total including delivery
   const finalTotal = totalAmount + deliveryFee;
-  
-  // Convert to cents for Stripe (CRITICAL FIX)
-  const totalInCents = Math.round(finalTotal * 100);
 
   // Redirect if cart is empty
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !showSuccess) {
       navigate('/carrello');
     }
-  }, [items, navigate]);
+  }, [items, navigate, showSuccess]);
 
   // Validate form
   useEffect(() => {
@@ -66,14 +69,19 @@ const Checkout: React.FC = () => {
 
   const handlePaymentSuccess = async (orderId: string) => {
     try {
-      // Clear cart after successful payment
-      await clearCart();
-      // Navigate to order detail page
-//navigate(`/ordini`);
+      setOrderId(orderId);
+      setShowSuccess(true);
+      
+      // Show success message for 5 seconds before redirecting
+      setTimeout(() => {
+        setIsRedirecting(true);
+        clearCart();
+        navigate('/ordini');
+      }, 5000);
     } catch (error) {
-      console.error('Error clearing cart:', error);
-      // Still navigate to order page even if cart clear fails
-      navigate(`/ordini`);
+      console.error('Error during success handling:', error);
+      // If something fails, still redirect after showing message
+      setTimeout(() => navigate('/ordini'), 5000);
     }
   };
 
@@ -81,7 +89,7 @@ const Checkout: React.FC = () => {
     console.error('Payment error:', error);
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !showSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -100,7 +108,42 @@ const Checkout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 relative">
+      {/* Success Overlay */}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <div className="text-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Pagamento Riuscito!</h2>
+              <p className="text-gray-700 mb-4">
+                Il tuo ordine è stato completato con successo.
+              </p>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-600 mb-1">Codice Ordine:</p>
+                <p className="font-mono text-lg font-semibold text-gray-900">#{orderId.slice(0, 8).toUpperCase()}</p>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Riceverai una email di conferma con i dettagli dell'ordine.
+              </p>
+              
+              <div className="flex items-center justify-center text-blue-600">
+                {isRedirecting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    <span>Reindirizzamento in corso...</span>
+                  </>
+                ) : (
+                  <span>Verrai reindirizzato alla pagina degli ordini tra 5 secondi</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
 
