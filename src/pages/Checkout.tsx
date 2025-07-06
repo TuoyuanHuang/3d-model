@@ -363,7 +363,7 @@ const Checkout: React.FC = () => {
               <>
                 {termsAccepted ? (
                   <CheckoutForm
-                    amount={totalInCents} 
+                    amount={finalTotal} 
                     productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
                     productId="cart-order"
                     cartItems={items}
