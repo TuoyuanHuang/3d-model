@@ -125,9 +125,7 @@ const Checkout: React.FC = () => {
                 <p className="font-mono text-lg font-semibold text-gray-900">#{orderId.slice(0, 8).toUpperCase()}</p>
               </div>
               
-              <p className="text-gray-600 mb-6">
-                Riceverai una email di conferma con i dettagli dell'ordine.
-              </p>
+              
               
               <div className="flex items-center justify-center text-blue-600">
                 {isRedirecting ? (
