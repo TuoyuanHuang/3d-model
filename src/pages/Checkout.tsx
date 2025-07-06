@@ -360,21 +360,21 @@ const Checkout: React.FC = () => {
 
             {/* Payment Form */}
             {formValid ? (
-  <>
-    {termsAccepted ? (
-      <CheckoutForm
-        amount={totalInCents}  {/* Remove this comment */}
-        productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
-        productId="cart-order"
-        cartItems={items}
-        customerInfo={customerInfo}
-        deliveryMethod={deliveryMethod}
-        deliveryFee={deliveryFee}
-        authToken={session?.access_token}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-      />
-    ) : (
+              <>
+                {termsAccepted ? (
+                  <CheckoutForm
+                    amount={totalInCents} 
+                    productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
+                    productId="cart-order"
+                    cartItems={items}
+                    customerInfo={customerInfo}
+                    deliveryMethod={deliveryMethod}
+                    deliveryFee={deliveryFee}
+                    authToken={session?.access_token}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                ) : (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <p className="text-yellow-800 font-medium flex items-center">
                       <AlertCircle className="h-5 w-5 mr-2" />
