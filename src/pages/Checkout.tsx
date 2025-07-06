@@ -69,12 +69,12 @@ const Checkout: React.FC = () => {
       // Clear cart after successful payment
       await clearCart();
       // Navigate to order detail page
-      navigate(`/ordini`);
+/*navigate(`/ordini`);
     } catch (error) {
       console.error('Error clearing cart:', error);
       // Still navigate to order page even if cart clear fails
       navigate(`/ordini`);
-    }
+    }**/
   };
 
   const handlePaymentError = (error: string) => {
