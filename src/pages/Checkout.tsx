@@ -134,7 +134,7 @@ const Checkout: React.FC = () => {
                     <span>Reindirizzamento in corso...</span>
                   </>
                 ) : (
-                  <span>Verrai reindirizzato alla pagina degli ordini tra 30 secondi</span>
+                  <span>Verrai reindirizzato alla pagina degli ordini tra 5 secondi</span>
                 )}
               </div>
             </div>
