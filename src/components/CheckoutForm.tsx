@@ -155,7 +155,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               colorPrimary: '#2563eb',
               colorBackground: '#f9fafb',
               colorText: '#374151',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontFamiimly: 'Inter, system-ui, sans-serif'
             }
           } 
         }}>
