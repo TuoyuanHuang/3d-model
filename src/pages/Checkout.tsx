@@ -81,7 +81,7 @@ const Checkout: React.FC = () => {
     } catch (error) {
       console.error('Error during success handling:', error);
       // If something fails, still redirect after showing message
-      setTimeout(() => navigate('/ordini'), 5000);
+      setTimeout(() => navigate('/ordini'), 30000);
     }
   };
 
@@ -134,7 +134,7 @@ const Checkout: React.FC = () => {
                     <span>Reindirizzamento in corso...</span>
                   </>
                 ) : (
-                  <span>Verrai reindirizzato alla pagina degli ordini tra 5 secondi</span>
+                  <span>Verrai reindirizzato alla pagina degli ordini tra 30 secondi</span>
                 )}
               </div>
             </div>
