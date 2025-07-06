@@ -1,4 +1,4 @@
-import{u as b,j as e}from"./index-uCfaxT6h.js";import{r}from"./vendor-seEwQDT5.js";import{L as l}from"./router-BnLuTL28.js";import{z as d,b as o,G as N,y,x as v,h as w,D as _}from"./ui-CrNHFUv9.js";import"./supabase-BZoxqOT3.js";const k=()=>{const{supabase:i}=b(),[n,x]=r.useState([]),[m,u]=r.useState(!0),[c,h]=r.useState("");r.useEffect(()=>{(async()=>{try{const{data:t,error:a}=await i.from("orders").select(`
+import{u as b,j as e}from"./index-DUfOYqed.js";import{r}from"./vendor-seEwQDT5.js";import{L as l}from"./router-BnLuTL28.js";import{B as d,b as o,G as N,z as y,y as v,h as w,x as _}from"./ui-BkBIl3wn.js";import"./supabase-BZoxqOT3.js";const k=()=>{const{supabase:i}=b(),[n,x]=r.useState([]),[m,u]=r.useState(!0),[c,h]=r.useState("");r.useEffect(()=>{(async()=>{try{const{data:t,error:a}=await i.from("orders").select(`
             *,
             order_items (
               product_name,
