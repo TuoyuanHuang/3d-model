@@ -299,7 +299,7 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              <<CheckoutForm
+              <CheckoutForm
   amount={finalTotal}
   productName={`Ordine carrello (${items.length} ${items.length === 1 ? 'prodotto' : 'prodotti'})`}
   productId="cart-order"
