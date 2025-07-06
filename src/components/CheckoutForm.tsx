@@ -61,6 +61,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [orderId, setOrderId] = useState<string>('');
@@ -107,13 +108,20 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
         isProcessingPaymentRequest.current = true;
 
         // Create payment intent if not already created
-        if (!clientSecret) {
+        let secret = clientSecret;
+        if (!secret) {
           const response = await createPaymentIntent();
-          setClientSecret(response.clientSecret);
+          secret = response.clientSecret;
+          setClientSecret(secret);
+        }
+
+        // Validate client secret format
+        if (!secret || !secret.includes('_secret_')) {
+          throw new Error('Invalid client secret format');
         }
 
         const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
-          clientSecret,
+          secret,
           {
             payment_method: ev.paymentMethod.id,
             receipt_email: ev.payerEmail || customerInfo.email,
@@ -156,40 +164,45 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const createPaymentIntent = async () => {
     validateCustomerInfo();
 
-    const requestData = {
-      amount: Math.round(amount * 100),
-      currency: 'eur',
-      productName,
-      productId,
-      selectedColor,
-      selectedSize,
-      sizeDimensions,
-      customerNote,
-      quantity,
-      deliveryMethod,
-      deliveryFee,
-      cartItems,
-      customerInfo,
-    };
+    setIsCreatingIntent(true);
+    try {
+      const requestData = {
+        amount: Math.round(amount * 100),
+        currency: 'eur',
+        productName,
+        productId,
+        selectedColor,
+        selectedSize,
+        sizeDimensions,
+        customerNote,
+        quantity,
+        deliveryMethod,
+        deliveryFee,
+        cartItems,
+        customerInfo,
+      };
 
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment-intent`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
-      },
-      body: JSON.stringify(requestData),
-    });
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(requestData),
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(parseErrorResponse(errorText));
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(parseErrorResponse(errorText));
+      }
+
+      const result = await response.json();
+      setClientSecret(result.clientSecret);
+      paymentIntentCreated.current = true;
+      return result;
+    } finally {
+      setIsCreatingIntent(false);
     }
-
-    const result = await response.json();
-    setClientSecret(result.clientSecret);
-    paymentIntentCreated.current = true;
-    return result;
   };
 
   const validateCustomerInfo = () => {
@@ -231,8 +244,7 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!stripe || !elements) {
-      setErrorMessage('Stripe is not loaded yet. Please try again in a few seconds.');
+    if (!stripe || !elements || isLoading || isCreatingIntent) {
       return;
     }
 
@@ -248,12 +260,19 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
     try {
       // Create payment intent if not already created
-      if (!clientSecret && !paymentIntentCreated.current) {
+      let secret = clientSecret;
+      if (!secret && !paymentIntentCreated.current) {
         const response = await createPaymentIntent();
-        setClientSecret(response.clientSecret);
+        secret = response.clientSecret;
+        setClientSecret(secret);
       }
 
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      // Validate client secret format
+      if (!secret || !secret.includes('_secret_')) {
+        throw new Error('Invalid client secret format');
+      }
+
+      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(secret, {
         payment_method: {
           card: cardElement,
           billing_details: {
@@ -408,10 +427,10 @@ const PaymentForm: React.FC<CheckoutFormProps> = ({
 
       <button
         type="submit"
-        disabled={!stripe || isLoading || paymentStatus === 'processing'}
+        disabled={!stripe || isLoading || isCreatingIntent || paymentStatus === 'processing'}
         className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-4 px-6 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center space-x-2"
       >
-        {isLoading ? (
+        {(isLoading || isCreatingIntent) ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
             <span>Processing...</span>
