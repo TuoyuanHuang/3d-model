@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import PaymentForm from './PaymentForm';
+import { Elements, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 
 interface CartItem {
   id: string;
@@ -39,6 +38,76 @@ interface CheckoutFormProps {
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
+const EmbeddedPaymentForm: React.FC<{
+  paymentIntentId: string;
+  orderId: string;
+  onSuccess: () => void;
+  onError: (error: string) => void;
+}> = ({ paymentIntentId, orderId, onSuccess, onError }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/orders/${orderId}`,
+        },
+        redirect: 'if_required'
+      });
+
+      if (error) {
+        if (error.type === "card_error" || error.type === "validation_error") {
+          setMessage(error.message || "An error occurred during payment");
+        } else {
+          setMessage("Unexpected error during payment");
+        }
+        onError(error.message || "Payment failed");
+      } else {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error("Payment confirmation error:", error);
+      setMessage("Error processing payment");
+      onError(error.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <form id="payment-form" onSubmit={handleSubmit}>
+      <PaymentElement options={{
+        layout: {
+          type: 'accordion',
+          defaultCollapsed: false,
+        }
+      }} />
+      <button 
+        disabled={isProcessing || !stripe || !elements} 
+        id="submit"
+        className="mt-6 w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+      >
+        {isProcessing ? "Processing..." : "Pay now"}
+      </button>
+      {message && (
+        <div className="mt-4 text-red-500 text-center">{message}</div>
+      )}
+    </form>
+  );
+};
+
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   amount,
   productName,
@@ -58,15 +127,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const handleSubmit = async () => {
     try {
-      // Validate amount is integer
       if (!Number.isInteger(amount)) {
-        onError('Formato importo non valido');
-        return;
-      }
-
-      // Additional validation for minimum amount
-      if (amount < 50) { // 50 cents = €0.50
-        onError('L\'importo minimo per un pagamento è €0.50');
+        onError('Invalid amount format');
         return;
       }
 
@@ -90,31 +152,18 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         })
       });
 
-      // Handle HTTP errors
       if (!response.ok) {
-        let errorMessage = 'Errore nel server';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || 'Impossibile creare il pagamento';
-        } catch (e) {
-          errorMessage = `Errore ${response.status}: ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create payment intent');
       }
 
       const { clientSecret, paymentIntentId, orderId } = await response.json();
-      
-      // Validate response data
-      if (!clientSecret || !paymentIntentId || !orderId) {
-        throw new Error('Dati di risposta incompleti dal server');
-      }
-
       setClientSecret(clientSecret);
       setPaymentIntentId(paymentIntentId);
       setOrderId(orderId);
     } catch (error) {
       console.error('Payment intent creation failed:', error);
-      onError(error.message || 'Impossibile inizializzare il pagamento');
+      onError(error.message || 'Failed to initialize payment');
       setIsLoading(false);
     }
   };
@@ -123,7 +172,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     if (orderId) {
       onSuccess(orderId);
     } else {
-      onError('ID ordine mancante dopo il pagamento');
+      onError('Order ID missing after payment success');
     }
   };
 
@@ -134,32 +183,21 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           {isLoading ? (
             <div className="py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Inizializzazione del pagamento...</p>
+              <p className="mt-4 text-gray-600">Initializing payment...</p>
             </div>
           ) : (
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors duration-200"
+              className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
-              Procedi al Pagamento - €{(amount / 100).toFixed(2)}
+              Proceed to Payment
             </button>
           )}
         </div>
       ) : (
-        <Elements stripe={stripePromise} options={{ 
-          clientSecret,
-          appearance: {
-            theme: 'stripe',
-            variables: {
-              colorPrimary: '#2563eb',
-              colorBackground: '#f9fafb',
-              colorText: '#374151',
-              fontFamiimly: 'Inter, system-ui, sans-serif'
-            }
-          } 
-        }}>
-          <PaymentForm 
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <EmbeddedPaymentForm 
             paymentIntentId={paymentIntentId!}
             orderId={orderId!}
             onSuccess={handlePaymentSuccess}
